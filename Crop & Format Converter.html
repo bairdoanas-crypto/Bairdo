@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bairdo | Images Tool</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#353534",
+                    "on-secondary": "#2f2f40",
+                    "surface-container": "#201f1f",
+                    "on-secondary-container": "#b5b3c8",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-low": "#1c1b1b",
+                    "primary": "#d6c3b6",
+                    "surface-container-highest": "#353534",
+                    "secondary": "#c6c4da",
+                    "on-secondary-fixed": "#1a1a2a",
+                    "on-tertiary-fixed": "#1a1a29",
+                    "surface-dim": "#131313",
+                    "surface": "#131313",
+                    "tertiary-fixed-dim": "#c6c4d9",
+                    "on-error": "#690005",
+                    "tertiary-container": "#2f2f3f",
+                    "on-surface": "#e5e2e1",
+                    "primary-container": "#3a2e25",
+                    "secondary-fixed": "#e3e0f7",
+                    "on-primary-container": "#a69589",
+                    "on-background": "#e5e2e1",
+                    "outline-variant": "#4e453f",
+                    "on-secondary-fixed-variant": "#464557",
+                    "surface-container-high": "#2a2a2a",
+                    "inverse-on-surface": "#313030",
+                    "inverse-primary": "#6a5c51",
+                    "surface-tint": "#d6c3b6",
+                    "on-primary": "#3a2e25",
+                    "tertiary-fixed": "#e3e0f6",
+                    "on-primary-fixed": "#241911",
+                    "inverse-surface": "#e5e2e1",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#454556",
+                    "surface-container-lowest": "#0e0e0e",
+                    "on-surface-variant": "#d1c4bc",
+                    "secondary-container": "#464557",
+                    "on-primary-fixed-variant": "#52443a",
+                    "error": "#ffb4ab",
+                    "surface-bright": "#393939",
+                    "secondary-fixed-dim": "#c6c4da",
+                    "background": "#131313",
+                    "outline": "#9a8f87",
+                    "primary-fixed-dim": "#d6c3b6",
+                    "on-tertiary-container": "#9896aa",
+                    "primary-fixed": "#f3dfd1",
+                    "tertiary": "#c6c4d9",
+                    "on-tertiary": "#2f2f3f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "header-height": "72px",
+                    "margin-mobile": "20px",
+                    "stack-md": "16px",
+                    "margin-desktop": "40px",
+                    "gutter": "24px",
+                    "stack-sm": "8px",
+                    "stack-lg": "32px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-sm": ["Inter"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "label-md": ["JetBrains Mono"],
+                    "body-md": ["Inter"],
+                    "display-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #121212;
+            color: #e5e2e1;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .dark-oak-btn {
+            background-color: #3a2e25;
+            transition: background-color 0.2s ease, transform 0.1s active;
+        }
+        .dark-oak-btn:hover {
+            background-color: #4d3e32;
+        }
+        .surface-card {
+            background-color: #1e1e2e;
+            border: 1px solid #2d2d3d;
+        }
+        .drop-zone-active {
+            border-color: #d6c3b6;
+            background-color: #2d2d3d;
+        }
+        /* Cropper.js overrides to match dark theme */
+        .cropper-view-box,
+        .cropper-face {
+            border-radius: 0;
+        }
+        .cropper-line, .cropper-point {
+            background-color: #d6c3b6;
+        }
+        .cropper-view-box {
+            outline-color: #d6c3b6;
+        }
+        #preview-container {
+            min-height: 320px;
+        }
+        #image-preview {
+            max-width: 100%;
+        }
+        .status-msg {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30,30,46,0.92);
+            border: 1px solid #4e453f;
+            color: #d6c3b6;
+            padding: 4px 16px;
+            border-radius: 99px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant h-header-height flex justify-between items-center px-margin-desktop shadow-none">
+<div class="flex items-center gap-stack-lg">
+<span class="font-display-lg text-display-lg text-primary dark:text-primary font-bold cursor-pointer">Bairdo</span>
+<nav class="hidden md:flex gap-stack-lg ml-stack-lg">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors cursor-pointer active:opacity-80" href="#">Home</a>
+<a class="font-body-md text-body-md text-primary dark:text-primary border-b-2 border-primary font-bold pb-1 transition-colors cursor-pointer active:opacity-80" href="#">Images</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors cursor-pointer active:opacity-80" href="#">Videos</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors cursor-pointer active:opacity-80" href="#">Audio</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors cursor-pointer active:opacity-80" href="#">Compress</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors cursor-pointer active:opacity-80" href="#">QR Tool</a>
+</nav>
+</div>
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="picture_as_pdf">picture_as_pdf</span>
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80" data-icon="code">code</span>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User Profile" data-alt="A professional close-up headshot of a person with a serene expression, set against a dark, architecturally focused background. The lighting is soft and directional, highlighting the contours of the face with a warm, amber glow that aligns with the Bairdo brand palette. The overall mood is sophisticated, professional, and tranquil." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo_T8Dd1103fLXUr7PI5teDcQM6vv39UXavZfq1AUPZxSd9fqYJqYY3VMTkRHxmIK8hs5lYkMpiK29ArLSoWH3zLL-jn4j1slyLUNzUPP24-NBcDQEyPoBLmUNAqrBF_5gOzub296CrHK5ugyH8PbAQE18MavLroARk4bmCHe1gYsRZF9uwvE2RRjNP5UXoEcE3lW-7EIBUYH66i_wkc2cXUM-2wM6eXr0FBXFDnXM5lpluwt57mfI3jm-DV_3zWk3sUt47wQXtSs"/>
+</div>
+</div>
+</header>
+<main class="pt-[120px] pb-stack-lg px-margin-mobile md:px-margin-desktop max-w-4xl mx-auto min-h-screen">
+<!-- Header Section -->
+<section class="mb-stack-lg text-center md:text-left">
+<h1 class="font-headline-lg text-headline-lg md:text-display-lg md:font-display-lg text-on-surface mb-2">Crop &amp; Format Converter</h1>
+<p class="text-on-surface-variant font-body-md">Architectural precision for your visual assets. Prepare images for web and print with ease.</p>
+</section>
+<!-- Tool Card -->
+<div class="surface-card p-6 md:p-stack-lg rounded-lg flex flex-col gap-stack-lg">
+<!-- Drag & Drop Area -->
+<div class="border-2 border-dashed border-outline-variant rounded-lg p-12 flex flex-col items-center justify-center gap-stack-md hover:border-primary transition-all cursor-pointer bg-surface-container-low" id="drop-zone">
+<span class="material-symbols-outlined text-4xl text-primary" data-icon="upload_file">upload_file</span>
+<div class="text-center">
+<p class="font-headline-lg text-lg text-on-surface">Drag and drop your image here</p>
+<p class="text-on-surface-variant text-body-sm">or click to browse local files (JPG, PNG, WEBP)</p>
+</div>
+<input accept="image/*" class="hidden" id="file-input" type="file"/>
+</div>
+<!-- Preview Placeholder (Initially Hidden or Shown as empty) -->
+<div class="hidden w-full aspect-video bg-surface-container-highest rounded-lg border border-outline-variant overflow-hidden relative" id="preview-container">
+<img alt="Preview" class="w-full h-full object-contain" data-alt="A placeholder for a digital image preview on a professional toolkit interface. The area is framed by a subtle 1px border in a dark-oak themed UI. The background of the preview area is a deep charcoal, ensuring high contrast for any loaded visual content. The aesthetic is clean, industrial, and focused on functional minimalism." id="image-preview" src=""/>
+<div class="absolute top-4 right-4 bg-surface/80 backdrop-blur-md px-3 py-1 rounded-full border border-outline-variant">
+<span class="text-label-md font-label-md text-primary">LIVE PREVIEW</span>
+</div>
+</div>
+<!-- Controls Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg">
+<!-- Aspect Ratio -->
+<div class="flex flex-col gap-stack-sm">
+<label class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Aspect Ratio</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="aspect-ratio-btn surface-card py-3 text-label-md font-label-md hover:border-primary border-primary bg-primary-container text-primary" data-ratio="original">ORIGINAL</button>
+<button class="aspect-ratio-btn surface-card py-3 text-label-md font-label-md hover:border-primary" data-ratio="1:1">1:1</button>
+<button class="aspect-ratio-btn surface-card py-3 text-label-md font-label-md hover:border-primary" data-ratio="16:9">16:9</button>
+<button class="aspect-ratio-btn surface-card py-3 text-label-md font-label-md hover:border-primary" data-ratio="4:5">4:5</button>
+<button class="aspect-ratio-btn surface-card py-3 text-label-md font-label-md hover:border-primary" data-ratio="3:2">3:2</button>
+<button class="aspect-ratio-btn surface-card py-3 text-label-md font-label-md hover:border-primary" data-ratio="custom">CUSTOM</button>
+</div>
+</div>
+<!-- Format Selection -->
+<div class="flex flex-col gap-stack-sm">
+<label class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Target Format</label>
+<div class="flex flex-col gap-2">
+<select class="surface-card bg-surface-container-high border-outline-variant text-on-surface p-3 rounded-lg focus:border-primary outline-none appearance-none cursor-pointer">
+<option value="jpeg">JPEG (.jpg)</option>
+<option value="png">PNG (.png)</option>
+<option selected="" value="webp">WebP (.webp)</option>
+<option value="avif">AVIF (.avif)</option>
+</select>
+<p class="text-body-sm text-on-surface-variant italic">WebP is recommended for optimal web performance.</p>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col md:flex-row gap-stack-md pt-4">
+<button class="dark-oak-btn flex-1 py-4 px-8 rounded-lg text-white font-label-md tracking-widest uppercase flex items-center justify-center gap-2 active:scale-[0.98]" id="process-btn">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    Process Image
+                </button>
+<button class="border border-primary-container text-primary-fixed-dim hover:bg-primary-container/20 py-4 px-8 rounded-lg font-label-md tracking-widest uppercase flex items-center justify-center gap-2 transition-all opacity-50 cursor-not-allowed" disabled="" id="download-btn">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+                    Download
+                </button>
+</div>
+</div>
+<!-- Documentation/Tips -->
+<div class="mt-stack-lg grid grid-cols-1 md:grid-cols-3 gap-stack-md">
+<div class="surface-card p-4 rounded-lg flex gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="lock">lock</span>
+<div>
+<h4 class="text-label-md font-bold mb-1">Local Processing</h4>
+<p class="text-body-sm text-on-surface-variant">Your files never leave your device. Privacy by design.</p>
+</div>
+</div>
+<div class="surface-card p-4 rounded-lg flex gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+<div>
+<h4 class="text-label-md font-bold mb-1">Ultra Fast</h4>
+<p class="text-body-sm text-on-surface-variant">GPU-accelerated transformations in your browser.</p>
+</div>
+</div>
+<div class="surface-card p-4 rounded-lg flex gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="high_quality">high_quality</span>
+<div>
+<h4 class="text-label-md font-bold mb-1">Lossless Output</h4>
+<p class="text-body-sm text-on-surface-variant">Intelligent algorithms maintain visual fidelity.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-stack-lg bg-background dark:bg-background border-t border-outline-variant dark:border-outline-variant flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-stack-md mt-12">
+<div class="flex flex-col md:flex-row items-center gap-stack-md">
+<span class="font-label-md text-label-md text-primary">Bairdo Toolkit</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant opacity-60">© 2024 Bairdo Toolkit. All rights reserved.</span>
+</div>
+<div class="flex gap-stack-lg">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Documentation</a>
+</div>
+</footer>
+<script>
+    // ── Elements ──────────────────────────────────────────────────────────────
+    const dropZone        = document.getElementById('drop-zone');
+    const fileInput       = document.getElementById('file-input');
+    const previewContainer= document.getElementById('preview-container');
+    const previewImage    = document.getElementById('image-preview');
+    const processBtn      = document.getElementById('process-btn');
+    const downloadBtn     = document.getElementById('download-btn');
+    const formatSelect    = document.querySelector('select');
+
+    let cropper       = null;   // Cropper.js instance
+    let currentRatio  = NaN;    // NaN = original (free)
+    let processedBlob = null;   // final result blob
+    let originalFile  = null;
+
+    // ── Drag & Drop / File Input ───────────────────────────────────────────────
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drop-zone-active');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drop-zone-active'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drop-zone-active');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) handleFile(files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) {
+            showStatus('Only image files are supported.', true); return;
+        }
+        originalFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // Destroy old cropper
+            if (cropper) { cropper.destroy(); cropper = null; }
+
+            previewImage.src = e.target.result;
+            previewContainer.classList.remove('hidden');
+            dropZone.classList.add('hidden');
+            processedBlob = null;
+            disableDownload();
+
+            // Init Cropper.js
+            cropper = new Cropper(previewImage, {
+                aspectRatio: currentRatio,
+                viewMode: 1,
+                background: false,
+                autoCropArea: 1,
+                responsive: true,
+                zoomable: true,
+                ready() { showStatus('Drag to crop · Scroll to zoom'); }
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ── Aspect Ratio Buttons ──────────────────────────────────────────────────
+    const ratioMap = {
+        'original': NaN,
+        '1:1': 1,
+        '16:9': 16/9,
+        '4:3': 4/3,
+        '4:5': 4/5,
+        '3:2': 3/2,
+        'custom': NaN   // free crop
+    };
+
+    const ratioBtns = document.querySelectorAll('.aspect-ratio-btn');
+    ratioBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            ratioBtns.forEach(b => b.classList.remove('border-primary','bg-primary-container','text-primary'));
+            btn.classList.add('border-primary','bg-primary-container','text-primary');
+
+            const key = btn.dataset.ratio;
+            currentRatio = ratioMap[key] ?? NaN;
+            if (cropper) cropper.setAspectRatio(currentRatio);
+        });
+    });
+
+    // ── Process (Crop + Convert) ──────────────────────────────────────────────
+    processBtn.addEventListener('click', async () => {
+        if (!cropper) return;
+
+        const originalHTML = processBtn.innerHTML;
+        processBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
+        processBtn.disabled = true;
+
+        // Small delay so the UI updates first
+        await new Promise(r => setTimeout(r, 50));
+
+        try {
+            const format   = formatSelect.value;                   // jpeg / png / webp / avif
+            const mimeType = 'image/' + format;
+            const quality  = (format === 'png') ? undefined : 0.92;
+
+            // Get cropped canvas from Cropper.js
+            const canvas = cropper.getCroppedCanvas({
+                maxWidth: 8000, maxHeight: 8000,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            // Convert canvas → Blob
+            processedBlob = await new Promise((res, rej) =>
+                canvas.toBlob(b => b ? res(b) : rej(new Error('Conversion failed')), mimeType, quality)
+            );
+
+            // Update preview with processed result
+            const url = URL.createObjectURL(processedBlob);
+            cropper.destroy(); cropper = null;
+            previewImage.src = url;
+
+            enableDownload(format);
+            showStatus(`✓ Ready · ${format.toUpperCase()} · ${(processedBlob.size/1024).toFixed(1)} KB`);
+
+        } catch(err) {
+            showStatus('Error: ' + err.message, true);
+        } finally {
+            processBtn.innerHTML = originalHTML;
+            processBtn.disabled = false;
+        }
+    });
+
+    // ── Download ──────────────────────────────────────────────────────────────
+    downloadBtn.addEventListener('click', () => {
+        if (!processedBlob) return;
+        const format = formatSelect.value;
+        const ext    = format === 'jpeg' ? 'jpg' : format;
+        const baseName = (originalFile?.name.replace(/\.[^.]+$/, '') || 'image');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(processedBlob);
+        a.download = `${baseName}_bairdo.${ext}`;
+        a.click();
+    });
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function enableDownload(format) {
+        downloadBtn.classList.remove('opacity-50','cursor-not-allowed');
+        downloadBtn.removeAttribute('disabled');
+    }
+    function disableDownload() {
+        downloadBtn.classList.add('opacity-50','cursor-not-allowed');
+        downloadBtn.setAttribute('disabled','');
+    }
+
+    function showStatus(msg, isError = false) {
+        // Remove existing
+        document.querySelectorAll('.status-msg').forEach(el => el.remove());
+        const el = document.createElement('div');
+        el.className = 'status-msg';
+        el.style.color = isError ? '#ffb4ab' : '#d6c3b6';
+        el.textContent = msg;
+        previewContainer.style.position = 'relative';
+        previewContainer.appendChild(el);
+        if (!isError) setTimeout(() => el.remove(), 3500);
+    }
+</script>
+</body></html>
