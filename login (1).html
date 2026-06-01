@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Geist:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Firebase SDKs -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signInWithPopup, signInAnonymously, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // ==========================================
+  // 🔧 ضع Firebase config بتاعك هنا
+  // ==========================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3CWk3-mBly4eJDIzUdA_FOXYX2-L9Yd4",
+    authDomain: "bairdo-e23a3.firebaseapp.com",
+    projectId: "bairdo-e23a3",
+    storageBucket: "bairdo-e23a3.firebasestorage.app",
+    messagingSenderId: "8126805307",
+    appId: "1:8126805307:web:dbf71743bd29a3b73d731e"
+  };
+  // ==========================================
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const googleProvider = new GoogleAuthProvider();
+
+  // لو المستخدم مسجل دخول بالفعل، روّحه على طول لـ home
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = "home.html";
+    }
+  });
+
+  // ---- Email/Password Login ----
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    let isValid = true;
+
+    if (!emailInput.value || !emailInput.value.includes('@')) {
+      emailInput.classList.add('border-error');
+      emailError.classList.remove('hidden');
+      isValid = false;
+    } else {
+      emailInput.classList.remove('border-error');
+      emailError.classList.add('hidden');
+    }
+
+    if (!passwordInput.value || passwordInput.value.length < 1) {
+      passwordInput.classList.add('border-error');
+      passwordError.classList.remove('hidden');
+      isValid = false;
+    } else {
+      passwordInput.classList.remove('border-error');
+      passwordError.classList.add('hidden');
+    }
+
+    if (!isValid) return;
+
+    // Loading state
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.innerHTML = `<span class="material-symbols-outlined animate-spin" style="animation: spin 1s linear infinite;">progress_activity</span>`;
+    submitBtn.disabled = true;
+
+    try {
+      await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+      // onAuthStateChanged هيتفعل ويعمل redirect تلقائي
+    } catch (error) {
+      submitBtn.innerHTML = originalHTML;
+      submitBtn.disabled = false;
+
+      // إظهار رسالة الخطأ المناسبة
+      let msg = "حدث خطأ، حاول مرة أخرى.";
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        msg = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+      } else if (error.code === 'auth/too-many-requests') {
+        msg = "محاولات كثيرة جداً. جرب بعد قليل.";
+      } else if (error.code === 'auth/network-request-failed') {
+        msg = "تحقق من الاتصال بالإنترنت.";
+      }
+
+      // عرض الخطأ تحت حقل كلمة المرور
+      passwordError.textContent = msg;
+      passwordError.classList.remove('hidden');
+      passwordInput.classList.add('border-error');
+    }
+  });
+
+  // ---- Google Sign-In ----
+  document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('googleSignInBtn');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<span class="material-symbols-outlined animate-spin" style="animation: spin 1s linear infinite;">progress_activity</span> جارٍ التسجيل...`;
+    btn.disabled = true;
+
+    try {
+      await signInWithPopup(auth, googleProvider);
+      // onAuthStateChanged هيعمل redirect
+    } catch (error) {
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+
+      if (error.code !== 'auth/popup-closed-by-user') {
+        // عرض خطأ عام
+        const errDiv = document.getElementById('googleError');
+        if (errDiv) {
+          errDiv.textContent = "فشل تسجيل الدخول بجوجل. حاول مرة أخرى.";
+          errDiv.classList.remove('hidden');
+          setTimeout(() => errDiv.classList.add('hidden'), 4000);
+        }
+      }
+    }
+  });
+
+  // ---- Guest (Anonymous) Sign-In ----
+  document.getElementById('guestBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('guestBtn');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite; display:inline-block;">progress_activity</span> جارٍ الدخول...`;
+    btn.disabled = true;
+
+    try {
+      await signInAnonymously(auth);
+      // onAuthStateChanged هيعمل redirect لـ home.html
+    } catch (error) {
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+      const errDiv = document.getElementById('googleError');
+      errDiv.textContent = "فشل الدخول كضيف. تأكد من تفعيل Anonymous في Firebase.";
+      errDiv.classList.remove('hidden');
+      setTimeout(() => errDiv.classList.add('hidden'), 4000);
+    }
+  });
+
+  // CSS animation for spinner
+  const style = document.createElement('style');
+  style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+  document.head.appendChild(style);
+</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .wood-texture {
+            background-image: linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+            background-size: 4px 100%;
+        }
+        .inner-glow {
+            box-shadow: inset 0 1px 0 0 rgba(61, 43, 31, 1);
+        }
+        .focus-glow:focus-within {
+            box-shadow: 0 0 0 2px rgba(212, 163, 115, 0.2);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error-container": "#93000a",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-primary-fixed-variant": "#623f18",
+                      "surface": "#131313",
+                      "on-primary-fixed": "#2c1600",
+                      "surface-container-highest": "#353535",
+                      "tertiary-fixed": "#ffdcc2",
+                      "surface-bright": "#393939",
+                      "on-surface-variant": "#d4c4b7",
+                      "on-secondary-container": "#ccb09f",
+                      "inverse-on-surface": "#313030",
+                      "primary-fixed-dim": "#f0bd8b",
+                      "on-surface": "#e5e2e1",
+                      "secondary-fixed": "#fbddca",
+                      "on-primary-container": "#5b3912",
+                      "secondary-fixed-dim": "#dec1af",
+                      "surface-container-high": "#2a2a2a",
+                      "on-error": "#690005",
+                      "surface-dim": "#131313",
+                      "tertiary-fixed-dim": "#f4bb8e",
+                      "surface-container-low": "#1c1b1b",
+                      "surface-tint": "#f0bd8b",
+                      "primary-container": "#d4a373",
+                      "on-tertiary-container": "#5d3715",
+                      "on-secondary-fixed": "#28180d",
+                      "on-secondary-fixed-variant": "#574335",
+                      "on-tertiary-fixed": "#2e1500",
+                      "secondary-container": "#574335",
+                      "outline-variant": "#50453b",
+                      "secondary": "#dec1af",
+                      "tertiary": "#f5bc8f",
+                      "on-background": "#e5e2e1",
+                      "surface-variant": "#353535",
+                      "outline": "#9c8e82",
+                      "on-primary": "#482904",
+                      "primary": "#f2be8c",
+                      "inverse-surface": "#e5e2e1",
+                      "tertiary-container": "#d7a176",
+                      "error": "#ffb4ab",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary": "#3f2c20",
+                      "background": "#131313",
+                      "surface-container": "#20201f",
+                      "on-tertiary-fixed-variant": "#653e1b",
+                      "primary-fixed": "#ffdcbd",
+                      "on-tertiary": "#4a2806",
+                      "inverse-primary": "#7d562d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "md": "1.5rem",
+                      "margin-desktop": "48px",
+                      "xs": "0.5rem",
+                      "margin-mobile": "16px",
+                      "sm": "1rem",
+                      "xl": "4rem",
+                      "gutter": "24px",
+                      "lg": "2.5rem"
+              },
+              "fontFamily": {
+                      "label-sm": ["JetBrains Mono"],
+                      "headline-md": ["Geist"],
+                      "body-lg": ["Geist"],
+                      "display-lg-mobile": ["Geist"],
+                      "display-lg": ["Geist"],
+                      "body-md": ["Geist"]
+              },
+              "fontSize": {
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- TopNavBar Shell (Filtered for Login Page) -->
+<header class="bg-surface docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-md py-sm max-w-7xl mx-auto">
+<div class="flex items-center gap-xs">
+<span class="font-headline-md text-headline-md font-bold text-primary">Bairdo</span>
+</div>
+<div class="flex items-center gap-md">
+<button onclick="window.location.href='signup.html'" class="font-body-md text-body-md text-primary border border-primary px-sm py-xs rounded transition-all hover:bg-primary/10 active:scale-95">
+                    Sign Up
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Content: Login Canvas -->
+<main class="flex-grow flex items-center justify-center px-margin-mobile md:px-margin-desktop py-xl">
+<div class="w-full max-w-md relative group">
+<!-- Decorative Background Element -->
+<div class="absolute -inset-1 bg-gradient-to-r from-primary-container/20 to-tertiary-container/20 rounded-xl blur-lg opacity-25 transition duration-1000 group-hover:opacity-40"></div>
+<!-- Login Card -->
+<div class="relative bg-surface-container-low border border-outline-variant rounded-lg wood-texture inner-glow p-lg overflow-hidden shadow-2xl">
+<!-- Card Header -->
+<div class="mb-lg text-center">
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-on-surface mb-xs">Welcome Back</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Access your professional dashboard</p>
+</div>
+<!-- Form Section -->
+<form class="space-y-md" id="loginForm" novalidate="">
+<div class="space-y-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant block" for="email">EMAIL ADDRESS</label>
+<div class="relative focus-glow rounded">
+<input class="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-0 text-on-surface p-sm transition-all outline-none rounded" id="email" name="email" placeholder="name@company.com" required="" type="email"/>
+</div>
+<p class="hidden font-label-sm text-label-sm text-error mt-1" id="emailError">Please enter a valid email address.</p>
+</div>
+<div class="space-y-xs">
+<div class="flex justify-between items-center">
+<label class="font-label-sm text-label-sm text-on-surface-variant block" for="password">PASSWORD</label>
+<a class="font-label-sm text-label-sm text-primary hover:underline transition-all" href="#">Forgot?</a>
+</div>
+<div class="relative focus-glow rounded">
+<input class="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-0 text-on-surface p-sm transition-all outline-none rounded" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+<p class="hidden font-label-sm text-label-sm text-error mt-1" id="passwordError">Password is required.</p>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container font-headline-md text-headline-md py-sm rounded-lg hover:brightness-110 active:scale-[0.98] transition-all flex justify-center items-center gap-xs mt-lg" type="submit">
+                        Login
+                        <span class="material-symbols-outlined text-[20px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="relative my-lg flex items-center justify-center">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant"></div>
+</div>
+<span class="relative px-sm bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm">OR</span>
+</div>
+<!-- Social/Guest Section -->
+<div class="social-login-wrapper space-y-sm">
+<p class="hidden font-label-sm text-label-sm text-error text-center" id="googleError"></p>
+<button id="googleSignInBtn" class="w-full flex items-center justify-center gap-sm bg-surface-container-high border border-outline-variant text-on-surface font-body-md text-body-md py-sm rounded hover:bg-surface-bright transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]" data-icon="google">google</span>
+                        Sign in with Google
+                    </button>
+<button id="guestBtn" class="w-full flex items-center justify-center gap-sm border border-secondary text-secondary font-body-md text-body-md py-sm rounded hover:bg-secondary/5 transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+                        Continue as Guest
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Shell -->
+<footer class="w-full px-md py-lg flex flex-col md:flex-row justify-between items-center gap-xs bg-surface-container-low text-secondary font-label-sm text-label-sm mt-auto">
+<div class="flex flex-col items-center md:items-start gap-xs">
+<span class="font-headline-md text-headline-md text-primary">Bairdo</span>
+<p class="text-on-surface-variant">© 2024 Bairdo. Architectural Professionalism.</p>
+</div>
+<div class="flex gap-md text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Contact Support</a>
+</div>
+</footer>
+<!-- Clear error on input -->
+<script>
+  ['email', 'password'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function() {
+      this.classList.remove('border-error');
+      document.getElementById(id + 'Error').classList.add('hidden');
+    });
+  });
+</script>
+</body></html>
