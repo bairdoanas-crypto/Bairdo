@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Audio Tool - Bairdo Toolkit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-variant": "#353534","on-secondary": "#2f2f40","surface-container": "#201f1f",
+          "on-secondary-container": "#b5b3c8","on-error-container": "#ffdad6","surface-container-low": "#1c1b1b",
+          "primary": "#d6c3b6","surface-container-highest": "#353534","secondary": "#c6c4da",
+          "surface-dim": "#131313","surface": "#131313","on-error": "#690005","tertiary-container": "#2f2f3f",
+          "on-surface": "#e5e2e1","primary-container": "#3a2e25","on-primary-container": "#a69589",
+          "on-background": "#e5e2e1","outline-variant": "#4e453f","surface-container-high": "#2a2a2a",
+          "inverse-on-surface": "#313030","inverse-primary": "#6a5c51","surface-tint": "#d6c3b6",
+          "on-primary": "#3a2e25","surface-container-lowest": "#0e0e0e","on-surface-variant": "#d1c4bc",
+          "secondary-container": "#464557","error-container": "#93000a","error": "#ffb4ab",
+          "surface-bright": "#393939","background": "#121212","outline": "#9a8f87","tertiary": "#c6c4d9","on-tertiary": "#2f2f3f"
+        },
+        borderRadius: { "DEFAULT": "0.125rem","lg": "0.25rem","xl": "0.5rem","full": "0.75rem" },
+        spacing: { "header-height": "72px","margin-mobile": "20px","stack-md": "16px","margin-desktop": "40px","gutter": "24px","stack-sm": "8px","stack-lg": "32px" },
+        fontFamily: { "headline-lg": ["Hanken Grotesk"],"body-sm": ["Inter"],"headline-lg-mobile": ["Hanken Grotesk"],"label-md": ["JetBrains Mono"],"body-md": ["Inter"],"display-lg": ["Hanken Grotesk"] },
+        fontSize: {
+          "headline-lg": ["32px", {"lineHeight": "40px","letterSpacing": "-0.01em","fontWeight": "600"}],
+          "body-sm": ["14px", {"lineHeight": "20px","fontWeight": "400"}],
+          "headline-lg-mobile": ["24px", {"lineHeight": "32px","fontWeight": "600"}],
+          "label-md": ["12px", {"lineHeight": "16px","letterSpacing": "0.05em","fontWeight": "500"}],
+          "body-md": ["16px", {"lineHeight": "24px","fontWeight": "400"}],
+          "display-lg": ["48px", {"lineHeight": "56px","letterSpacing": "-0.02em","fontWeight": "700"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block; line-height: 1; text-transform: none;
+    letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr;
+  }
+  .waveform-bar { transition: height 0.15s ease-in-out; }
+  #progress-handle { cursor: ew-resize; }
+  #trim-start-handle, #trim-end-handle { cursor: ew-resize; touch-action: none; }
+  .toast { animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
+  @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+  input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #d6c3b6; cursor: pointer; margin-top: -5px; }
+  input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: #2d2d3d; }
+  input[type=range]:focus { outline: none; }
+  .meter-bar { transition: width 0.05s linear; }
+</style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen">
+
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface border-b border-outline-variant flex justify-between items-center h-header-height px-margin-desktop">
+  <div class="flex items-center gap-stack-lg">
+    <span class="font-display-lg text-display-lg text-primary font-bold">Bairdo</span>
+    <div class="hidden md:flex gap-stack-md items-center">
+      <a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Home</a>
+      <a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Images</a>
+      <a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Videos</a>
+      <a class="font-body-md text-body-md text-primary border-b-2 border-primary font-bold pb-1 cursor-pointer" href="#">Audio</a>
+      <a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Compress</a>
+      <a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">QR Tool</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-stack-md">
+    <span class="material-symbols-outlined text-primary cursor-pointer">qr_code_scanner</span>
+    <span class="material-symbols-outlined text-primary cursor-pointer">picture_as_pdf</span>
+    <span class="material-symbols-outlined text-primary cursor-pointer">code</span>
+    <div class="w-8 h-8 rounded-full bg-primary-container overflow-hidden flex items-center justify-center">
+      <span class="material-symbols-outlined text-primary text-sm">person</span>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content Canvas -->
+<main class="pt-[calc(72px+40px)] pb-stack-lg px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto flex flex-col gap-stack-lg">
+
+  <!-- Hero Header -->
+  <header class="flex flex-col gap-stack-sm mb-stack-md">
+    <h1 class="font-headline-lg text-headline-lg md:text-display-lg text-on-surface">Audio Studio</h1>
+    <p class="font-body-md text-on-surface-variant max-w-2xl">High-precision tools for cutting, trimming, and converting your audio assets. Architectural precision for your sound design workflow.</p>
+  </header>
+
+  <!-- Tool Section -->
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+
+    <!-- Main Interaction Card -->
+    <div class="lg:col-span-8 bg-[#1e1e2e] border border-[#2d2d3d] rounded-lg p-stack-lg flex flex-col gap-stack-lg">
+      <div class="flex justify-between items-center border-b border-[#2d2d3d] pb-stack-md">
+        <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg">Cut &amp; Format Converter</h2>
+        <div class="flex gap-stack-sm items-center">
+          <!-- Volume -->
+          <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary" id="vol-icon">volume_up</span>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-20 hidden md:block"/>
+          <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary" id="btn-info">info</span>
+        </div>
+      </div>
+
+      <!-- Upload Area -->
+      <div class="border-2 border-dashed border-[#2d2d3d] rounded-lg p-stack-lg flex flex-col items-center justify-center text-center gap-stack-md hover:border-primary transition-all group cursor-pointer bg-[#121212]" id="drop-zone">
+        <span class="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-primary transition-colors" id="upload-icon">cloud_upload</span>
+        <div class="flex flex-col gap-1" id="upload-text">
+          <span class="font-label-md text-label-md text-on-surface">Drag and drop audio file</span>
+          <span class="font-body-sm text-body-sm text-on-surface-variant">Supports MP3, WAV, AAC, FLAC (Max 50MB)</span>
+        </div>
+        <button class="mt-stack-sm px-6 py-2 border border-[#3a2e25] text-primary font-label-md text-label-md uppercase tracking-wider hover:bg-[#3a2e25] hover:text-white transition-all" id="select-btn">Select File</button>
+        <input type="file" id="file-input" accept="audio/*" class="hidden"/>
+      </div>
+
+      <!-- Waveform & Cutting Tool -->
+      <div class="flex flex-col gap-stack-md bg-[#121212] p-stack-md rounded-lg border border-[#2d2d3d]">
+        <div class="flex justify-between items-center mb-stack-sm">
+          <span class="font-label-md text-label-md text-primary" id="time-display">00:00 / 00:00</span>
+          <div class="flex gap-2 items-center">
+            <span class="font-label-md text-label-md text-on-surface-variant text-[10px]" id="trim-range-display">TRIM: Full</span>
+            <span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer" id="btn-zoom-in">zoom_in</span>
+            <span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer" id="btn-zoom-out">zoom_out</span>
+            <span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer text-sm" id="btn-reset-trim" title="Reset trim">crop_free</span>
+          </div>
+        </div>
+
+        <!-- Waveform -->
+        <div class="relative select-none" style="height:128px;" id="waveform-wrapper">
+          <canvas id="waveform-canvas" class="w-full h-full rounded cursor-crosshair" style="height:128px;"></canvas>
+          <!-- Trim handles overlay -->
+          <div id="trim-overlay" class="absolute inset-0 pointer-events-none">
+            <!-- Left dim region -->
+            <div id="trim-left-dim" class="absolute top-0 bottom-0 left-0 bg-black/50" style="width:0%"></div>
+            <!-- Right dim region -->
+            <div id="trim-right-dim" class="absolute top-0 bottom-0 right-0 bg-black/50" style="width:0%"></div>
+            <!-- Start handle -->
+            <div id="trim-start-handle" class="absolute top-0 bottom-0 w-1 bg-primary pointer-events-auto" style="left:0%">
+              <div class="absolute top-1 left-1/2 -translate-x-1/2 w-3 h-5 bg-primary rounded-sm"></div>
+            </div>
+            <!-- End handle -->
+            <div id="trim-end-handle" class="absolute top-0 bottom-0 w-1 bg-primary pointer-events-auto" style="right:0%; left:auto;">
+              <div class="absolute top-1 left-1/2 -translate-x-1/2 w-3 h-5 bg-primary rounded-sm"></div>
+            </div>
+            <!-- Playhead -->
+            <div id="playhead" class="absolute top-0 bottom-0 w-[2px] bg-white/70 shadow-[0_0_6px_rgba(255,255,255,0.4)]" style="left:0%;"></div>
+          </div>
+        </div>
+
+        <!-- VU Meter -->
+        <div class="flex flex-col gap-1 mt-1">
+          <div class="flex items-center gap-2">
+            <span class="font-label-md text-[9px] text-on-surface-variant w-3">L</span>
+            <div class="flex-1 h-1.5 bg-[#2d2d3d] rounded overflow-hidden"><div id="vu-left" class="meter-bar h-full bg-primary rounded" style="width:0%"></div></div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-label-md text-[9px] text-on-surface-variant w-3">R</span>
+            <div class="flex-1 h-1.5 bg-[#2d2d3d] rounded overflow-hidden"><div id="vu-right" class="meter-bar h-full bg-primary rounded" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <!-- Audio Controls -->
+        <div class="flex justify-center items-center gap-stack-lg py-2">
+          <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary" id="btn-back10">replay_10</span>
+          <span class="material-symbols-outlined text-3xl text-on-surface cursor-pointer hover:text-primary" id="btn-play" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+          <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary" id="btn-fwd10">forward_10</span>
+        </div>
+      </div>
+
+      <!-- Options Row -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg">
+        <div class="flex flex-col gap-stack-sm">
+          <label class="font-label-md text-label-md text-on-surface-variant uppercase">Output Format</label>
+          <div class="flex gap-2" id="format-btns">
+            <button data-fmt="mp3" class="fmt-btn active px-4 py-2 bg-primary-container text-white border border-primary font-label-md text-label-md rounded">MP3</button>
+            <button data-fmt="wav" class="fmt-btn px-4 py-2 bg-[#2d2d3d] text-on-surface-variant border border-transparent font-label-md text-label-md rounded hover:border-[#3a2e25]">WAV</button>
+            <button data-fmt="ogg" class="fmt-btn px-4 py-2 bg-[#2d2d3d] text-on-surface-variant border border-transparent font-label-md text-label-md rounded hover:border-[#3a2e25]">OGG</button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-stack-sm">
+          <label class="font-label-md text-label-md text-on-surface-variant uppercase">Bitrate</label>
+          <select id="bitrate-select" class="bg-[#121212] border border-[#2d2d3d] text-on-surface font-body-sm px-4 py-2 rounded focus:border-primary outline-none appearance-none">
+            <option value="320">320kbps (High Quality)</option>
+            <option value="256" selected>256kbps (Balanced)</option>
+            <option value="128">128kbps (Compact)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Normalize toggle -->
+      <div class="flex items-center justify-between border border-[#2d2d3d] rounded px-4 py-3">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary">equalizer</span>
+          <div>
+            <div class="font-label-md text-label-md text-on-surface">Normalize Audio</div>
+            <div class="text-[11px] text-on-surface-variant">Balance levels to optimal loudness</div>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="normalize-toggle" class="sr-only peer"/>
+          <div class="w-10 h-5 bg-[#2d2d3d] peer-checked:bg-primary-container rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-on-surface-variant after:peer-checked:bg-primary after:rounded-full after:h-4 after:w-4 after:transition-all after:peer-checked:translate-x-5"></div>
+        </label>
+      </div>
+
+      <!-- Process Button -->
+      <button id="process-btn" class="w-full py-4 bg-[#3a2e25] text-white font-label-md text-label-md uppercase tracking-[0.2em] font-bold hover:brightness-110 active:opacity-80 transition-all flex items-center justify-center gap-stack-md disabled:opacity-40 disabled:cursor-not-allowed">
+        <span id="process-text">Process &amp; Download</span>
+        <span class="material-symbols-outlined" id="process-icon">download</span>
+      </button>
+
+      <!-- Progress bar (hidden) -->
+      <div id="progress-wrap" class="hidden flex flex-col gap-2">
+        <div class="h-1 bg-[#2d2d3d] rounded overflow-hidden">
+          <div id="progress-bar" class="h-full bg-primary rounded transition-all" style="width:0%"></div>
+        </div>
+        <span id="progress-label" class="font-label-md text-[10px] text-on-surface-variant text-center">Processing…</span>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-4 flex flex-col gap-gutter">
+      <!-- Metadata Card -->
+      <div class="bg-[#1e1e2e] border border-[#2d2d3d] rounded-lg p-stack-md flex flex-col gap-stack-md">
+        <h3 class="font-label-md text-label-md text-primary uppercase border-b border-[#2d2d3d] pb-2">Active File Info</h3>
+        <div class="flex flex-col gap-3" id="file-meta">
+          <div class="flex justify-between items-center">
+            <span class="text-body-sm text-on-surface-variant">Name:</span>
+            <span class="text-body-sm text-on-surface truncate max-w-[150px]" id="meta-name">—</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-body-sm text-on-surface-variant">Size:</span>
+            <span class="text-body-sm text-on-surface" id="meta-size">—</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-body-sm text-on-surface-variant">Duration:</span>
+            <span class="text-body-sm text-on-surface" id="meta-duration">—</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-body-sm text-on-surface-variant">Sample Rate:</span>
+            <span class="text-body-sm text-on-surface" id="meta-samplerate">—</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-body-sm text-on-surface-variant">Channels:</span>
+            <span class="text-body-sm text-on-surface" id="meta-channels">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Card -->
+      <div class="bg-[#1e1e2e] border border-[#2d2d3d] rounded-lg p-stack-md flex flex-col gap-stack-md">
+        <h3 class="font-label-md text-label-md text-primary uppercase border-b border-[#2d2d3d] pb-2">Recent Exports</h3>
+        <ul class="flex flex-col gap-1" id="history-list">
+          <li class="p-2 text-center text-on-surface-variant text-body-sm italic" id="history-empty">No exports yet</li>
+        </ul>
+      </div>
+
+      <!-- Pro Tip Card -->
+      <div class="bg-[#1e1e2e] border border-primary/20 rounded-lg p-stack-md flex flex-start gap-stack-md">
+        <span class="material-symbols-outlined text-primary">lightbulb</span>
+        <div class="flex flex-col gap-1">
+          <h4 class="font-label-md text-label-md text-on-surface font-bold">Pro Tip</h4>
+          <p class="text-[12px] leading-relaxed text-on-surface-variant">Drag the golden handles on the waveform to set precise start and end trim points before exporting.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Bento Section -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter mt-stack-lg">
+    <div class="bg-[#1e1e2e] border border-[#2d2d3d] p-stack-lg rounded-lg flex flex-col gap-stack-md hover:border-primary/50 transition-colors">
+      <span class="material-symbols-outlined text-3xl text-primary">equalizer</span>
+      <h3 class="font-headline-lg text-headline-lg-mobile">Normalization</h3>
+      <p class="text-body-sm text-on-surface-variant">Automatically balance audio levels across your entire track without distortion or artifacts.</p>
+    </div>
+    <div class="bg-[#1e1e2e] border border-[#2d2d3d] p-stack-lg rounded-lg flex flex-col gap-stack-md hover:border-primary/50 transition-colors">
+      <span class="material-symbols-outlined text-3xl text-primary">speed</span>
+      <h3 class="font-headline-lg text-headline-lg-mobile">Tempo Warp</h3>
+      <p class="text-body-sm text-on-surface-variant">Adjust playback speed from 0.5x to 2.0x while maintaining the original pitch using modern resampling.</p>
+    </div>
+    <div class="bg-[#1e1e2e] border border-[#2d2d3d] p-stack-lg rounded-lg flex flex-col gap-stack-md hover:border-primary/50 transition-colors">
+      <span class="material-symbols-outlined text-3xl text-primary">layers</span>
+      <h3 class="font-headline-lg text-headline-lg-mobile">Batch Convert</h3>
+      <p class="text-body-sm text-on-surface-variant">Process up to 20 files simultaneously with shared export settings to save your precious time.</p>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-stack-lg border-t border-outline-variant bg-background flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-stack-md mt-stack-lg">
+  <div class="flex flex-col gap-1 items-center md:items-start">
+    <span class="font-label-md text-label-md text-primary">Bairdo Toolkit</span>
+    <span class="font-body-sm text-body-sm text-on-surface-variant">© 2024 Bairdo Toolkit. All rights reserved.</span>
+  </div>
+  <div class="flex gap-stack-lg">
+    <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Privacy Policy</a>
+    <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Terms of Service</a>
+    <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Documentation</a>
+  </div>
+</footer>
+
+<!-- Toast container -->
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-[100]"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let audioCtx = null;
+let audioBuffer = null;
+let sourceNode = null;
+let analyserL = null, analyserR = null;
+let gainNode = null;
+let isPlaying = false;
+let startTime = 0;      // audioCtx.currentTime when play started
+let pauseOffset = 0;    // seconds into audio when paused
+let trimStart = 0;      // 0..1
+let trimEnd = 1;        // 0..1
+let zoomLevel = 1;
+let selectedFormat = 'mp3';
+let currentFile = null;
+let historyItems = [];
+let animFrame = null;
+let vuFrame = null;
+
+// ─── DOM refs ─────────────────────────────────────────────────────────────────
+const fileInput = document.getElementById('file-input');
+const dropZone = document.getElementById('drop-zone');
+const selectBtn = document.getElementById('select-btn');
+const canvas = document.getElementById('waveform-canvas');
+const ctx2d = canvas.getContext('2d');
+const timeDisplay = document.getElementById('time-display');
+const trimRangeDisplay = document.getElementById('trim-range-display');
+const btnPlay = document.getElementById('btn-play');
+const btnBack10 = document.getElementById('btn-back10');
+const btnFwd10 = document.getElementById('btn-fwd10');
+const playhead = document.getElementById('playhead');
+const trimStartHandle = document.getElementById('trim-start-handle');
+const trimEndHandle = document.getElementById('trim-end-handle');
+const trimLeftDim = document.getElementById('trim-left-dim');
+const trimRightDim = document.getElementById('trim-right-dim');
+const processBtn = document.getElementById('process-btn');
+const processText = document.getElementById('process-text');
+const processIcon = document.getElementById('process-icon');
+const progressWrap = document.getElementById('progress-wrap');
+const progressBar = document.getElementById('progress-bar');
+const progressLabel = document.getElementById('progress-label');
+const volumeSlider = document.getElementById('volume-slider');
+const volIcon = document.getElementById('vol-icon');
+const metaName = document.getElementById('meta-name');
+const metaSize = document.getElementById('meta-size');
+const metaDuration = document.getElementById('meta-duration');
+const metaSampleRate = document.getElementById('meta-samplerate');
+const metaChannels = document.getElementById('meta-channels');
+const historyList = document.getElementById('history-list');
+const historyEmpty = document.getElementById('history-empty');
+const vuLeft = document.getElementById('vu-left');
+const vuRight = document.getElementById('vu-right');
+const bitrateSelect = document.getElementById('bitrate-select');
+const normalizeToggle = document.getElementById('normalize-toggle');
+const btnResetTrim = document.getElementById('btn-reset-trim');
+const btnZoomIn = document.getElementById('btn-zoom-in');
+const btnZoomOut = document.getElementById('btn-zoom-out');
+
+// ─── Utility ──────────────────────────────────────────────────────────────────
+function fmtTime(s) {
+  if (!s || isNaN(s)) return '00:00';
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  const color = type === 'error' ? 'bg-error-container text-error' : 'bg-primary-container text-primary';
+  el.className = `toast px-5 py-3 rounded font-label-md text-label-md ${color} shadow-lg`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3100);
+}
+
+// ─── File Loading ─────────────────────────────────────────────────────────────
+function initAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
+  }
+}
+
+async function loadFile(file) {
+  if (file.size > 52428800) { toast('File too large (max 50MB)', 'error'); return; }
+  currentFile = file;
+  stopPlayback();
+  trimStart = 0; trimEnd = 1; updateTrimHandles();
+  
+  initAudioCtx();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  const arrayBuffer = await file.arrayBuffer();
+  try {
+    audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+  } catch(e) {
+    toast('Could not decode audio file.', 'error'); return;
+  }
+
+  // Metadata
+  metaName.textContent = file.name;
+  metaSize.textContent = formatBytes(file.size);
+  metaDuration.textContent = fmtTime(audioBuffer.duration);
+  metaSampleRate.textContent = audioBuffer.sampleRate.toLocaleString() + ' Hz';
+  metaChannels.textContent = audioBuffer.numberOfChannels === 1 ? 'Mono' : 'Stereo';
+
+  // Update upload zone to show filename
+  document.getElementById('upload-icon').textContent = 'audio_file';
+  document.getElementById('upload-text').innerHTML = `<span class="font-label-md text-label-md text-primary">${file.name}</span><span class="font-body-sm text-body-sm text-on-surface-variant">${fmtTime(audioBuffer.duration)} · ${formatBytes(file.size)}</span>`;
+
+  drawWaveform();
+  pauseOffset = 0;
+  updateTimeDisplay();
+  toast(`Loaded: ${file.name}`);
+}
+
+// ─── Waveform Drawing ─────────────────────────────────────────────────────────
+function drawWaveform() {
+  if (!audioBuffer) return;
+  const W = canvas.offsetWidth || 600;
+  const H = canvas.offsetHeight || 128;
+  canvas.width = W; canvas.height = H;
+
+  const data = audioBuffer.getChannelData(0);
+  const step = Math.ceil(data.length / W);
+  const mid = H / 2;
+
+  ctx2d.clearRect(0, 0, W, H);
+  // Background
+  ctx2d.fillStyle = '#121212';
+  ctx2d.fillRect(0, 0, W, H);
+
+  for (let x = 0; x < W; x++) {
+    let max = 0;
+    for (let i = x * step; i < (x + 1) * step && i < data.length; i++) {
+      if (Math.abs(data[i]) > max) max = Math.abs(data[i]);
+    }
+    const pct = x / W;
+    const inTrim = pct >= trimStart && pct <= trimEnd;
+    ctx2d.fillStyle = inTrim ? '#d6c3b6' : '#4e453f';
+    const barH = max * mid * 0.9;
+    ctx2d.fillRect(x, mid - barH, 1, barH * 2);
+  }
+}
+
+// ─── Trim Handles ─────────────────────────────────────────────────────────────
+function updateTrimHandles() {
+  const pctS = trimStart * 100;
+  const pctE = trimEnd * 100;
+  trimStartHandle.style.left = pctS + '%';
+  trimEndHandle.style.left = pctE + '%';
+  trimLeftDim.style.width = pctS + '%';
+  trimRightDim.style.width = (100 - pctE) + '%';
+  if (audioBuffer) {
+    const d = audioBuffer.duration;
+    const s = fmtTime(trimStart * d), e = fmtTime(trimEnd * d);
+    trimRangeDisplay.textContent = `TRIM: ${s} – ${e}`;
+  }
+  if (audioBuffer) drawWaveform();
+}
+
+function makeDraggable(handle, onDrag) {
+  let dragging = false;
+  const wrapper = document.getElementById('waveform-wrapper');
+  
+  handle.addEventListener('mousedown', e => { dragging = true; e.preventDefault(); });
+  handle.addEventListener('touchstart', e => { dragging = true; e.preventDefault(); }, {passive:false});
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const rect = wrapper.getBoundingClientRect();
+    let pct = (e.clientX - rect.left) / rect.width;
+    pct = Math.max(0, Math.min(1, pct));
+    onDrag(pct);
+  });
+  document.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const rect = wrapper.getBoundingClientRect();
+    let pct = (e.touches[0].clientX - rect.left) / rect.width;
+    pct = Math.max(0, Math.min(1, pct));
+    onDrag(pct);
+  }, {passive:false});
+  document.addEventListener('mouseup', () => { dragging = false; });
+  document.addEventListener('touchend', () => { dragging = false; });
+}
+
+makeDraggable(trimStartHandle, pct => {
+  trimStart = Math.min(pct, trimEnd - 0.01);
+  updateTrimHandles();
+});
+makeDraggable(trimEndHandle, pct => {
+  trimEnd = Math.max(pct, trimStart + 0.01);
+  updateTrimHandles();
+});
+
+btnResetTrim.addEventListener('click', () => {
+  trimStart = 0; trimEnd = 1;
+  updateTrimHandles();
+  toast('Trim reset');
+});
+
+// Click on waveform to seek
+canvas.addEventListener('click', e => {
+  if (!audioBuffer) return;
+  const rect = canvas.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  pauseOffset = pct * audioBuffer.duration;
+  if (isPlaying) { stopPlayback(); startPlayback(); }
+  updateTimeDisplay();
+  updatePlayhead();
+});
+
+// ─── Playback ─────────────────────────────────────────────────────────────────
+function setupAnalysers() {
+  if (analyserL) { try { analyserL.disconnect(); } catch(e){} }
+  if (analyserR) { try { analyserR.disconnect(); } catch(e){} }
+  analyserL = audioCtx.createAnalyser(); analyserL.fftSize = 256;
+  analyserR = audioCtx.createAnalyser(); analyserR.fftSize = 256;
+}
+
+function startPlayback() {
+  if (!audioBuffer) { toast('Load an audio file first', 'error'); return; }
+  stopPlayback();
+
+  setupAnalysers();
+  
+  let buffer = audioBuffer;
+  if (normalizeToggle.checked) buffer = normalizeBuffer(audioBuffer);
+
+  const trimS = trimStart * buffer.duration;
+  const trimE = trimEnd * buffer.duration;
+  const offset = Math.max(trimS, Math.min(trimE - 0.001, pauseOffset));
+
+  sourceNode = audioCtx.createBufferSource();
+  sourceNode.buffer = buffer;
+
+  // Splitter for L/R VU
+  if (buffer.numberOfChannels >= 2) {
+    const splitter = audioCtx.createChannelSplitter(2);
+    const mergerL = audioCtx.createChannelMerger(1);
+    const mergerR = audioCtx.createChannelMerger(1);
+    sourceNode.connect(splitter);
+    splitter.connect(mergerL, 0, 0);
+    splitter.connect(mergerR, 1, 0);
+    mergerL.connect(analyserL); analyserL.connect(gainNode);
+    mergerR.connect(analyserR);
+  } else {
+    sourceNode.connect(analyserL);
+    analyserL.connect(gainNode);
+    analyserR = analyserL;
+  }
+
+  gainNode.gain.value = parseFloat(volumeSlider.value);
+
+  const playDuration = trimE - offset;
+  sourceNode.start(0, offset, playDuration);
+  startTime = audioCtx.currentTime - (offset - trimS);
+  pauseOffset = offset;
+  isPlaying = true;
+
+  btnPlay.textContent = 'pause_circle';
+  btnPlay.style.fontVariationSettings = "'FILL' 1";
+
+  sourceNode.onended = () => {
+    if (isPlaying) {
+      isPlaying = false;
+      pauseOffset = trimStart * audioBuffer.duration;
+      btnPlay.textContent = 'play_circle';
+      stopVU();
+    }
+  };
+
+  startVU();
+  animFrame = requestAnimationFrame(animatePlayhead);
+}
+
+function stopPlayback() {
+  if (sourceNode) {
+    try {
+      if (isPlaying) {
+        pauseOffset = (audioCtx.currentTime - startTime) + (trimStart * audioBuffer.duration);
+        pauseOffset = Math.min(pauseOffset, trimEnd * audioBuffer.duration);
+      }
+      sourceNode.stop();
+      sourceNode.disconnect();
+    } catch(e){}
+    sourceNode = null;
+  }
+  isPlaying = false;
+  btnPlay.textContent = 'play_circle';
+  stopVU();
+  if (animFrame) cancelAnimationFrame(animFrame);
+}
+
+function animatePlayhead() {
+  if (!isPlaying || !audioBuffer) return;
+  updatePlayhead();
+  updateTimeDisplay();
+  animFrame = requestAnimationFrame(animatePlayhead);
+}
+
+function updatePlayhead() {
+  if (!audioBuffer) return;
+  let current = pauseOffset;
+  if (isPlaying) {
+    current = (audioCtx.currentTime - startTime) + (trimStart * audioBuffer.duration);
+  }
+  const pct = (current / audioBuffer.duration) * 100;
+  playhead.style.left = Math.min(100, Math.max(0, pct)) + '%';
+}
+
+function updateTimeDisplay() {
+  if (!audioBuffer) return;
+  let current = pauseOffset;
+  if (isPlaying) current = (audioCtx.currentTime - startTime) + (trimStart * audioBuffer.duration);
+  current = Math.min(current, audioBuffer.duration);
+  timeDisplay.textContent = `${fmtTime(current)} / ${fmtTime(audioBuffer.duration)}`;
+}
+
+// ─── VU Meter ─────────────────────────────────────────────────────────────────
+function startVU() {
+  function tick() {
+    if (!analyserL) return;
+    const dataL = new Uint8Array(analyserL.frequencyBinCount);
+    const dataR = new Uint8Array(analyserR.frequencyBinCount);
+    analyserL.getByteFrequencyData(dataL);
+    analyserR.getByteFrequencyData(dataR);
+    const avgL = dataL.reduce((a,b) => a+b, 0) / dataL.length;
+    const avgR = dataR.reduce((a,b) => a+b, 0) / dataR.length;
+    vuLeft.style.width = (avgL / 255 * 100) + '%';
+    vuRight.style.width = (avgR / 255 * 100) + '%';
+    vuFrame = requestAnimationFrame(tick);
+  }
+  vuFrame = requestAnimationFrame(tick);
+}
+function stopVU() {
+  if (vuFrame) cancelAnimationFrame(vuFrame);
+  vuLeft.style.width = '0%';
+  vuRight.style.width = '0%';
+}
+
+// ─── Normalization ────────────────────────────────────────────────────────────
+function normalizeBuffer(buffer) {
+  const newBuf = audioCtx.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+  let max = 0;
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const d = buffer.getChannelData(c);
+    for (let i = 0; i < d.length; i++) if (Math.abs(d[i]) > max) max = Math.abs(d[i]);
+  }
+  if (max === 0) return buffer;
+  const gain = 0.95 / max;
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const src = buffer.getChannelData(c);
+    const dst = newBuf.getChannelData(c);
+    for (let i = 0; i < src.length; i++) dst[i] = src[i] * gain;
+  }
+  return newBuf;
+}
+
+// ─── Export / Process ─────────────────────────────────────────────────────────
+async function processAndDownload() {
+  if (!audioBuffer) { toast('Load an audio file first', 'error'); return; }
+  stopPlayback();
+
+  // Slice
+  let buf = audioBuffer;
+  if (normalizeToggle.checked) buf = normalizeBuffer(buf);
+
+  const sampleRate = buf.sampleRate;
+  const startSample = Math.floor(trimStart * buf.duration * sampleRate);
+  const endSample = Math.floor(trimEnd * buf.duration * sampleRate);
+  const length = endSample - startSample;
+
+  const offlineCtx = new OfflineAudioContext(buf.numberOfChannels, length, sampleRate);
+  const slicedBuf = offlineCtx.createBuffer(buf.numberOfChannels, length, sampleRate);
+  for (let c = 0; c < buf.numberOfChannels; c++) {
+    slicedBuf.getChannelData(c).set(buf.getChannelData(c).subarray(startSample, endSample));
+  }
+  const src = offlineCtx.createBufferSource();
+  src.buffer = slicedBuf;
+  src.connect(offlineCtx.destination);
+  src.start();
+
+  // Show progress
+  progressWrap.classList.remove('hidden');
+  processBtn.disabled = true;
+  progressBar.style.width = '20%';
+  progressLabel.textContent = 'Rendering audio…';
+
+  let rendered;
+  try {
+    rendered = await offlineCtx.startRendering();
+  } catch(e) {
+    toast('Render failed', 'error');
+    processBtn.disabled = false;
+    progressWrap.classList.add('hidden');
+    return;
+  }
+
+  progressBar.style.width = '60%';
+  progressLabel.textContent = 'Encoding…';
+
+  await new Promise(r => setTimeout(r, 50));
+
+  const fmt = selectedFormat;
+  let blob, ext;
+
+  // Encode
+  if (fmt === 'wav') {
+    blob = encodeWav(rendered);
+    ext = 'wav';
+  } else if (fmt === 'ogg') {
+    // Fallback to wav if OGG not supported
+    blob = encodeWav(rendered);
+    ext = 'wav';
+    toast('OGG not available in browser — saved as WAV');
+  } else {
+    // MP3 via MediaRecorder if available, else WAV
+    try {
+      blob = await encodeViaMediaRecorder(rendered, 'audio/mpeg');
+      ext = 'mp3';
+    } catch(e) {
+      blob = encodeWav(rendered);
+      ext = 'wav';
+      toast('MP3 encoding not available — saved as WAV');
+    }
+  }
+
+  progressBar.style.width = '100%';
+  progressLabel.textContent = 'Done!';
+
+  // Download
+  const baseName = currentFile ? currentFile.name.replace(/\.[^.]+$/, '') : 'bairdo_export';
+  const fileName = `${baseName}_trimmed.${ext}`;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fileName; a.click();
+  URL.revokeObjectURL(url);
+
+  toast(`Downloaded: ${fileName}`);
+  addHistory(fileName, formatBytes(blob.size));
+
+  setTimeout(() => {
+    processBtn.disabled = false;
+    progressWrap.classList.add('hidden');
+    progressBar.style.width = '0%';
+  }, 1500);
+}
+
+// WAV encoder
+function encodeWav(buffer) {
+  const numCh = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length;
+  const abView = new ArrayBuffer(44 + length * numCh * 2);
+  const view = new DataView(abView);
+  function writeStr(offset, str) { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); }
+  writeStr(0, 'RIFF');
+  view.setUint32(4, 36 + length * numCh * 2, true);
+  writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+  view.setUint16(22, numCh, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numCh * 2, true);
+  view.setUint16(32, numCh * 2, true); view.setUint16(34, 16, true);
+  writeStr(36, 'data');
+  view.setUint32(40, length * numCh * 2, true);
+  let offset = 44;
+  for (let i = 0; i < length; i++) {
+    for (let c = 0; c < numCh; c++) {
+      const s = Math.max(-1, Math.min(1, buffer.getChannelData(c)[i]));
+      view.setInt16(offset, s * 0x7FFF, true);
+      offset += 2;
+    }
+  }
+  return new Blob([abView], { type: 'audio/wav' });
+}
+
+async function encodeViaMediaRecorder(buffer, mimeType) {
+  return new Promise((resolve, reject) => {
+    if (!MediaRecorder.isTypeSupported(mimeType)) { reject('not supported'); return; }
+    const dest = audioCtx.createMediaStreamDestination();
+    const src = audioCtx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(dest);
+    const rec = new MediaRecorder(dest.stream, { mimeType });
+    const chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
+    rec.start();
+    src.start();
+    src.onended = () => rec.stop();
+  });
+}
+
+// ─── History ──────────────────────────────────────────────────────────────────
+function addHistory(name, size) {
+  historyItems.unshift({ name, size, time: 'Just now' });
+  if (historyItems.length > 5) historyItems.pop();
+  historyEmpty.style.display = 'none';
+  historyList.innerHTML = historyItems.map(item => `
+    <li class="p-2 hover:bg-[#2d2d3d] transition-colors rounded cursor-pointer group flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">audio_file</span>
+        <span class="text-body-sm text-on-surface truncate max-w-[130px]">${item.name}</span>
+      </div>
+      <span class="text-[10px] text-on-surface-variant">${item.size}</span>
+    </li>`).join('');
+}
+
+// ─── Controls ─────────────────────────────────────────────────────────────────
+btnPlay.addEventListener('click', () => {
+  if (!audioBuffer) { toast('Load an audio file first', 'error'); return; }
+  initAudioCtx();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (isPlaying) stopPlayback();
+  else startPlayback();
+});
+
+btnBack10.addEventListener('click', () => {
+  if (!audioBuffer) return;
+  pauseOffset = Math.max(trimStart * audioBuffer.duration, pauseOffset - 10);
+  if (isPlaying) { stopPlayback(); startPlayback(); }
+  updateTimeDisplay(); updatePlayhead();
+});
+
+btnFwd10.addEventListener('click', () => {
+  if (!audioBuffer) return;
+  pauseOffset = Math.min(trimEnd * audioBuffer.duration, pauseOffset + 10);
+  if (isPlaying) { stopPlayback(); startPlayback(); }
+  updateTimeDisplay(); updatePlayhead();
+});
+
+volumeSlider.addEventListener('input', () => {
+  if (gainNode) gainNode.gain.value = parseFloat(volumeSlider.value);
+  const v = parseFloat(volumeSlider.value);
+  volIcon.textContent = v === 0 ? 'volume_off' : v < 0.5 ? 'volume_down' : 'volume_up';
+});
+
+volIcon.addEventListener('click', () => {
+  const v = parseFloat(volumeSlider.value);
+  volumeSlider.value = v > 0 ? 0 : 1;
+  volumeSlider.dispatchEvent(new Event('input'));
+});
+
+btnZoomIn.addEventListener('click', () => {
+  zoomLevel = Math.min(zoomLevel * 2, 16);
+  toast(`Zoom ${zoomLevel}x`);
+  // Visual zoom would require re-drawing a subsection — simplified indicator
+});
+btnZoomOut.addEventListener('click', () => {
+  zoomLevel = Math.max(zoomLevel / 2, 1);
+  toast(`Zoom ${zoomLevel}x`);
+});
+
+// Format buttons
+document.querySelectorAll('.fmt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedFormat = btn.dataset.fmt;
+    document.querySelectorAll('.fmt-btn').forEach(b => {
+      b.classList.remove('bg-primary-container','text-white','border-primary');
+      b.classList.add('bg-[#2d2d3d]','text-on-surface-variant','border-transparent');
+    });
+    btn.classList.remove('bg-[#2d2d3d]','text-on-surface-variant','border-transparent');
+    btn.classList.add('bg-primary-container','text-white','border-primary');
+  });
+});
+
+processBtn.addEventListener('click', processAndDownload);
+
+// ─── File drop / select ───────────────────────────────────────────────────────
+selectBtn.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+['dragenter','dragover'].forEach(ev => {
+  dropZone.addEventListener(ev, e => {
+    e.preventDefault();
+    dropZone.classList.add('border-primary','bg-primary/5');
+  });
+});
+['dragleave','drop'].forEach(ev => {
+  dropZone.addEventListener(ev, e => {
+    e.preventDefault();
+    dropZone.classList.remove('border-primary','bg-primary/5');
+    if (ev === 'drop' && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+});
+
+// ─── Resize waveform ─────────────────────────────────────────────────────────
+window.addEventListener('resize', () => { if (audioBuffer) drawWaveform(); });
+</script>
+</body>
+</html>

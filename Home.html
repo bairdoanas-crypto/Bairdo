@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bairdo | Professional Toolkit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#c6c4d9",
+                      "tertiary-container": "#2f2f3f",
+                      "on-primary-fixed-variant": "#52443a",
+                      "surface-tint": "#d6c3b6",
+                      "on-tertiary-fixed-variant": "#454556",
+                      "on-tertiary-container": "#9896aa",
+                      "on-error-container": "#ffdad6",
+                      "on-error": "#690005",
+                      "secondary": "#c6c4da",
+                      "surface-container-lowest": "#0e0e0e",
+                      "primary-fixed-dim": "#d6c3b6",
+                      "on-secondary-fixed": "#1a1a2a",
+                      "inverse-on-surface": "#313030",
+                      "surface-container-low": "#1c1b1b",
+                      "secondary-fixed": "#e3e0f7",
+                      "inverse-surface": "#e5e2e1",
+                      "on-secondary": "#2f2f40",
+                      "on-background": "#e5e2e1",
+                      "surface-container-highest": "#353534",
+                      "error-container": "#93000a",
+                      "secondary-container": "#464557",
+                      "surface-bright": "#393939",
+                      "inverse-primary": "#6a5c51",
+                      "background": "#131313",
+                      "tertiary-fixed-dim": "#c6c4d9",
+                      "surface": "#131313",
+                      "on-surface-variant": "#d1c4bc",
+                      "primary": "#d6c3b6",
+                      "on-primary-fixed": "#241911",
+                      "on-primary-container": "#a69589",
+                      "surface-variant": "#353534",
+                      "surface-container-high": "#2a2a2a",
+                      "outline-variant": "#4e453f",
+                      "outline": "#9a8f87",
+                      "surface-container": "#201f1f",
+                      "on-secondary-fixed-variant": "#464557",
+                      "primary-fixed": "#f3dfd1",
+                      "on-surface": "#e5e2e1",
+                      "on-secondary-container": "#b5b3c8",
+                      "surface-dim": "#131313",
+                      "secondary-fixed-dim": "#c6c4da",
+                      "primary-container": "#3a2e25",
+                      "error": "#ffb4ab",
+                      "tertiary-fixed": "#e3e0f6",
+                      "on-primary": "#3a2e25",
+                      "on-tertiary": "#2f2f3f",
+                      "on-tertiary-fixed": "#1a1a29"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "header-height": "72px",
+                      "stack-lg": "32px",
+                      "margin-mobile": "20px",
+                      "gutter": "24px",
+                      "stack-sm": "8px",
+                      "stack-md": "16px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Hanken Grotesk"],
+                      "body-sm": ["Inter"],
+                      "headline-lg": ["Hanken Grotesk"],
+                      "headline-lg-mobile": ["Hanken Grotesk"],
+                      "body-md": ["Inter"],
+                      "label-md": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #121212;
+            color: #e5e2e1;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        .tool-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tool-card:hover {
+            border-color: #3a2e25;
+            background-color: #2d2d3d;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md selection:bg-primary-container selection:text-primary">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant flex justify-between items-center h-header-height px-margin-mobile md:px-margin-desktop">
+<div class="flex items-center gap-stack-md">
+<span class="font-display-lg text-display-lg text-primary dark:text-primary font-bold tracking-tighter cursor-pointer" onclick="location.href='Home.html'">Bairdo</span>
+</div>
+<div class="hidden md:flex items-center gap-stack-lg">
+<a class="text-primary dark:text-primary border-b-2 border-primary font-bold pb-1 cursor-pointer font-body-md text-body-md" href="Home.html">Home</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer font-body-md text-body-md" href="Image.html">Images</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer font-body-md text-body-md" href="video.html">Videos</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer font-body-md text-body-md" href="audio.html">Audio</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer font-body-md text-body-md" href="tools.html">Tools</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer font-body-md text-body-md" href="code_editor.html">Code Editor</a>
+</div>
+<!-- Mobile hamburger -->
+<button class="md:hidden material-symbols-outlined text-primary" id="menu-btn">menu</button>
+</nav>
+<!-- Mobile drawer -->
+<div class="hidden fixed top-header-height left-0 w-full bg-surface border-b border-outline-variant z-40 flex-col px-margin-mobile py-stack-md gap-stack-sm" id="mobile-nav">
+  <a class="font-body-md text-primary font-bold py-2 border-b border-outline-variant/30" href="Home.html">Home</a>
+  <a class="font-body-md text-on-surface-variant hover:text-primary py-2 border-b border-outline-variant/30" href="Image.html">Images</a>
+  <a class="font-body-md text-on-surface-variant hover:text-primary py-2 border-b border-outline-variant/30" href="video.html">Videos</a>
+  <a class="font-body-md text-on-surface-variant hover:text-primary py-2 border-b border-outline-variant/30" href="audio.html">Audio</a>
+  <a class="font-body-md text-on-surface-variant hover:text-primary py-2 border-b border-outline-variant/30" href="tools.html">Tools</a>
+  <a class="font-body-md text-on-surface-variant hover:text-primary py-2" href="code_editor.html">Code Editor</a>
+</div>
+<main class="pt-[140px] pb-stack-lg px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center mb-24 max-w-4xl mx-auto">
+<div class="inline-flex items-center px-4 py-1.5 mb-stack-md rounded-full bg-secondary-container text-on-secondary-container border border-outline-variant">
+<span class="font-label-md text-label-md uppercase">Architectural Utility v2.4</span>
+</div>
+<h1 class="font-display-lg text-[40px] md:text-display-lg mb-stack-md text-on-surface">
+                Welcome to Bairdo - Your <span class="text-primary">All-in-One</span> Toolkit
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mb-stack-lg">
+                Professional-grade tools for your daily tasks. Built for speed, precision, and architectural reliability. Experience a workflow that values focus.
+            </p>
+<div class="flex flex-wrap gap-stack-md justify-center">
+<button class="bg-primary-container text-on-primary font-label-md text-label-md uppercase px-8 py-4 rounded-lg hover:brightness-110 active:opacity-80 transition-all" onclick="location.href='tools.html'">Explore All Tools</button>
+<button class="bg-transparent border border-primary-container text-primary font-label-md text-label-md uppercase px-8 py-4 rounded-lg hover:bg-primary-container/10 transition-all" onclick="location.href='code_editor.html'">Code Editor</button>
+</div>
+</section>
+<!-- Tools Grid (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<!-- Images Tool (Featured) -->
+<div class="md:col-span-2 md:row-span-2 p-8 rounded-xl bg-[#1e1e2e] border border-[#2d2d3d] flex flex-col justify-between tool-card group cursor-pointer" onclick="location.href='Image.html'">
+<div>
+<div class="w-12 h-12 rounded-lg bg-primary-container flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary" data-weight="fill">image</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg mb-2">Images</h3>
+<p class="text-on-surface-variant font-body-md mb-6">Batch process, resize, and convert images with lossless compression algorithms.</p>
+</div>
+<div class="mt-auto">
+<div class="relative h-48 w-full rounded-lg overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-80 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiGQkEdIgQLvvcxMfllUeiQoDuvm0UxTIJrpQjyE0jGQnKB74ejEVLLNySqQIn1RI94GRzTaS-Q5R3m4VBT385KBRVwoLvg3o8E4Kg-_anbtPOVHjaNN8YuFD8jT7hsUyeUg6IyAh66m2BVfB3BOZ_vn8gYwQwGo0qcmqT_H7CBPIw4qLlzQOFmAOWrMa99W_zYP7fJ8OYjyYujCYs5f-PZcEIe-O5eyw2XLQYxHjMKNIkEkVUQ8leXm9eVZ935s8xQsJJ_8m31y0"/>
+</div>
+</div>
+</div>
+<!-- Videos Tool -->
+<div class="p-6 rounded-xl bg-[#1e1e2e] border border-[#2d2d3d] tool-card flex flex-col cursor-pointer" onclick="location.href='video.html'">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">movie</span>
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile mb-1">Videos</h3>
+<p class="text-on-surface-variant font-body-sm">Trim, transcode, and optimize video files for web delivery.</p>
+</div>
+<!-- Audio Tool -->
+<div class="p-6 rounded-xl bg-[#1e1e2e] border border-[#2d2d3d] tool-card flex flex-col cursor-pointer" onclick="location.href='audio.html'">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">audiotrack</span>
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile mb-1">Audio</h3>
+<p class="text-on-surface-variant font-body-sm">Mastering tools and format conversion for audio engineers.</p>
+</div>
+<!-- PDF + Tools wide card -->
+<div class="md:col-span-2 p-6 rounded-xl bg-[#1e1e2e] border border-[#2d2d3d] tool-card flex items-center justify-between group cursor-pointer" onclick="location.href='tools.html'">
+<div class="flex items-center gap-6">
+<div class="w-12 h-12 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">build</span>
+</div>
+<div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile mb-1">Tools</h3>
+<p class="text-on-surface-variant font-body-sm">PDF, QR codes, ZIP, Links manager and more.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward_ios</span>
+</div>
+<!-- Code Editor (Featured Bottom) -->
+<div class="md:col-span-2 p-8 rounded-xl bg-[#1e1e2e] border border-[#2d2d3d] tool-card flex flex-col md:flex-row gap-6 group cursor-pointer" onclick="location.href='code_editor.html'">
+<div class="flex-1">
+<div class="w-12 h-12 rounded-lg bg-primary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">terminal</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg mb-2">Code Editor</h3>
+<p class="text-on-surface-variant font-body-md">A lightweight, browser-based IDE for rapid prototyping.</p>
+<button class="mt-6 flex items-center gap-2 text-primary font-label-md text-label-md uppercase tracking-widest hover:gap-4 transition-all" onclick="location.href='code_editor.html'">
+Launch Editor <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="flex-1 bg-[#121212] p-4 rounded-lg border border-[#2d2d3d] font-label-md text-label-md text-on-surface-variant group-hover:border-primary transition-colors">
+<div class="flex gap-1.5 mb-3">
+<div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-secondary-container"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary/40"></div>
+</div>
+<code class="block text-primary">function bairdo() {</code>
+<code class="block ml-4">console.log("Efficient Tooling");</code>
+<code class="block text-primary">}</code>
+</div>
+</div>
+</section>
+<!-- Statistics / Focus Area -->
+<section class="mt-24 py-16 px-8 rounded-2xl bg-primary-container/10 border border-primary-container/20 flex flex-col md:flex-row items-center justify-around gap-stack-lg">
+<div class="text-center">
+<span class="block font-display-lg text-display-lg text-primary">12ms</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.2em]">Avg Response</span>
+</div>
+<div class="w-[1px] h-12 bg-outline-variant hidden md:block"></div>
+<div class="text-center">
+<span class="block font-display-lg text-display-lg text-primary">100%</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.2em]">Local Privacy</span>
+</div>
+<div class="w-[1px] h-12 bg-outline-variant hidden md:block"></div>
+<div class="text-center">
+<span class="block font-display-lg text-display-lg text-primary">24+</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.2em]">Utility Modules</span>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-stack-lg bg-background dark:bg-background border-t border-outline-variant dark:border-outline-variant flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop gap-stack-md">
+<div class="flex items-center gap-4">
+<span class="font-label-md text-label-md text-primary font-bold">Bairdo Toolkit</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">© 2024 Bairdo Toolkit. All rights reserved.</span>
+</div>
+<div class="flex gap-stack-lg">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Documentation</a>
+</div>
+</footer>
+<script>
+        // Mobile menu
+        document.getElementById('menu-btn').addEventListener('click', () => {
+            const nav = document.getElementById('mobile-nav');
+            nav.classList.toggle('hidden');
+            nav.classList.toggle('flex');
+        });
+
+        // Micro-interaction for tool cards
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const icon = card.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 1, 'wght' 400";
+            });
+            card.addEventListener('mouseleave', () => {
+                const icon = card.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 0, 'wght' 400";
+            });
+        });
+    </script>
+</body></html>
