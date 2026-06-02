@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bairdo | Professional Tool Suite</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@100..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#393939",
+                    "primary-container": "#d4a373",
+                    "on-primary-fixed": "#2c1600",
+                    "inverse-on-surface": "#313030",
+                    "on-primary-container": "#5b3912",
+                    "on-error": "#690005",
+                    "primary-fixed-dim": "#f0bd8b",
+                    "surface-container": "#20201f",
+                    "surface-container-high": "#2a2a2a",
+                    "on-tertiary": "#4a2806",
+                    "on-tertiary-fixed": "#2e1500",
+                    "error-container": "#93000a",
+                    "on-secondary": "#3f2c20",
+                    "secondary-container": "#574335",
+                    "surface-container-highest": "#353535",
+                    "error": "#ffb4ab",
+                    "on-surface": "#e5e2e1",
+                    "tertiary-fixed": "#ffdcc2",
+                    "tertiary": "#f5bc8f",
+                    "on-secondary-fixed": "#28180d",
+                    "background": "#131313",
+                    "surface-tint": "#f0bd8b",
+                    "inverse-surface": "#e5e2e1",
+                    "surface-container-lowest": "#0e0e0e",
+                    "on-background": "#e5e2e1",
+                    "on-primary-fixed-variant": "#623f18",
+                    "primary-fixed": "#ffdcbd",
+                    "primary": "#f2be8c",
+                    "outline-variant": "#50453b",
+                    "on-secondary-fixed-variant": "#574335",
+                    "on-secondary-container": "#ccb09f",
+                    "outline": "#9c8e82",
+                    "on-tertiary-fixed-variant": "#653e1b",
+                    "surface-dim": "#131313",
+                    "secondary-fixed-dim": "#dec1af",
+                    "secondary-fixed": "#fbddca",
+                    "on-surface-variant": "#d4c4b7",
+                    "on-tertiary-container": "#5d3715",
+                    "tertiary-fixed-dim": "#f4bb8e",
+                    "surface-variant": "#353535",
+                    "secondary": "#dec1af",
+                    "surface": "#131313",
+                    "on-error-container": "#ffdad6",
+                    "inverse-primary": "#7d562d",
+                    "tertiary-container": "#d7a176",
+                    "surface-container-low": "#1c1b1b",
+                    "on-primary": "#482904"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "xs": "0.5rem",
+                    "gutter": "24px",
+                    "md": "1.5rem",
+                    "xl": "4rem",
+                    "sm": "1rem",
+                    "base": "4px",
+                    "lg": "2.5rem",
+                    "margin-desktop": "48px"
+            },
+            "fontFamily": {
+                    "body-md": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "display-lg-mobile": ["Geist"],
+                    "display-lg": ["Geist"],
+                    "label-sm": ["JetBrains Mono"],
+                    "body-lg": ["Geist"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .wood-texture {
+            background-image: linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+            background-size: 4px 100%;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .inner-glow-primary:hover {
+            box-shadow: 0 0 20px rgba(212, 163, 115, 0.1);
+        }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-outline-variant">
+<div class="flex items-center gap-8">
+<span class="text-headline-md font-headline-md text-primary dark:text-primary tracking-tighter">Bairdo</span>
+<div class="hidden lg:flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Image.html">Images</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="video.html">Video</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="audio.html">Audio</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Pdf.html">PDF</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Zip.html">ZIP</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Qrcode.html">QR</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="code.html">Code</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative" id="account-menu-wrapper">
+  <button id="account-btn" class="w-10 h-10 rounded-full bg-primary-container border-2 border-primary flex items-center justify-center overflow-hidden focus:outline-none hover:brightness-110 transition-all" style="border-radius:9999px;min-width:40px;min-height:40px;">
+    <img id="account-photo" src="" alt="profile" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;display:none;"/>
+    <span id="account-initials" class="text-on-primary font-bold text-sm" style="display:none;"></span>
+    <span id="account-loading" class="material-symbols-outlined text-primary text-[18px]" style="animation:spin 1s linear infinite;">progress_activity</span>
+  </button>
+  <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-surface-container-high border border-outline-variant rounded-xl shadow-2xl overflow-hidden" style="z-index:9999;">
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-outline-variant">
+      <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-primary" style="border-radius:9999px;">
+        <img id="dropdown-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:9999px;"/>
+        <div id="dropdown-initials-circle" class="w-full h-full bg-primary-container flex items-center justify-center" style="display:flex;">
+          <span id="dropdown-initials" class="text-on-primary font-bold text-sm"></span>
+        </div>
+      </div>
+      <div class="min-w-0">
+        <p id="dropdown-name" class="text-on-surface font-bold text-sm truncate"></p>
+        <p id="dropdown-email" class="text-on-surface-variant text-xs truncate mt-0.5"></p>
+      </div>
+    </div>
+    <button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-3 text-error hover:bg-error/10 transition-colors text-sm font-bold">
+      <span class="material-symbols-outlined text-[18px]">logout</span>
+      Log Out
+    </button>
+  </div>
+</div>
+</div>
+</nav>
+<main class="max-w-[1440px] mx-auto">
+<!-- Hero & Bento Grid -->
+<section class="px-margin-mobile md:px-margin-desktop py-xl">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+<div class="max-w-2xl">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-[0.2em] mb-4 block">Professional Toolkit</span>
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface leading-tight">
+                        Most Popular Tools. <br/>
+<span class="text-on-surface-variant">Precision Engineering.</span>
+</h1>
+</div>
+<div class="flex gap-2">
+<div class="p-2 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</div>
+<div class="p-2 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-primary">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter h-auto md:h-[600px]">
+<!-- Large Card: Image Processing -->
+<div onclick="location.href='Image.html'" class="md:col-span-2 md:row-span-2 bg-surface-container-high border border-outline-variant rounded-xl overflow-hidden relative group wood-texture cursor-pointer">
+<img class="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700" data-alt="A professional photographer's workspace at night, illuminated by a warm amber desk lamp and the soft glow of a high-resolution editing monitor. The scene features deep wooden textures of a mahogany desk, sleek metallic camera equipment, and a sophisticated, dark UI design on the screen. The atmosphere is quiet, focused, and reflects high-end digital craftsmanship with rich shadows and warm highlights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHlBSsGcGRw1DFnhZ-F4gtuzx7kcYUKvua4BuF8iCjP2ZxUYyS1QCM2sPxyK8LFp-9Oyus3nMA2VYq4mVlYybOPM5P3dsN1axvABisRe-uItH3fFdxX0YH7E59aNh7sKBHTrsTgEoKdH2LbMRrmlmERfCL5DFHy8LKhfjfx5tZv1kwdLqf3_TLwsYI0VjVi-tDv_mExAHotMK2t1KX52T8yy3mEWUq7Aag6N7Lxip3Jap2MrI0aw0o_6tY2_FTO5npeaxroZJhnR3J"/>
+<div class="absolute inset-0 p-lg flex flex-col justify-end bg-gradient-to-t from-background via-transparent to-transparent">
+<div class="mb-4 bg-primary/20 w-fit p-3 rounded-lg border border-primary/30 backdrop-blur-md">
+<span class="material-symbols-outlined text-primary text-3xl">image</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Image Processing</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-sm">Compress, resize, and convert images instantly with our professional-grade lossless algorithms.</p>
+<button class="mt-6 flex items-center gap-2 text-primary font-bold hover:gap-4 transition-all">
+                            Open Suite <span class="material-symbols-outlined">trending_flat</span>
+</button>
+</div>
+</div>
+<!-- Video Tools -->
+<div onclick="location.href='video.html'" class="md:col-span-2 bg-[#2B1E16] border-t border-white/5 rounded-xl p-lg wood-texture relative group overflow-hidden cursor-pointer">
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-6">
+<div class="bg-surface-container-highest p-3 rounded-lg border border-outline-variant group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-primary text-3xl">movie</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">MP4, MOV, WEBM</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Video Tools</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Quick edits and format conversion for production-ready social and web assets.</p>
+</div>
+<div class="absolute -right-8 -bottom-8 opacity-10 group-hover:rotate-12 transition-transform duration-500">
+<span class="material-symbols-outlined text-[120px]">movie</span>
+</div>
+</div>
+<!-- QR Code Generator -->
+<div onclick="location.href='Qrcode.html'" class="bg-surface-container border border-outline-variant rounded-xl p-md wood-texture inner-glow-primary transition-all cursor-pointer">
+<div class="bg-secondary-container/30 w-fit p-2 rounded-lg mb-4 border border-outline-variant">
+<span class="material-symbols-outlined text-primary">qr_code</span>
+</div>
+<h4 class="font-headline-md text-[20px] text-on-surface mb-2">QR Code Generator</h4>
+<p class="font-body-md text-sm text-on-surface-variant">Create custom branded QR codes with dynamic tracking.</p>
+</div>
+<!-- PDF Suite -->
+<div onclick="location.href='Pdf.html'" class="bg-surface-container border border-outline-variant rounded-xl p-md wood-texture inner-glow-primary transition-all cursor-pointer">
+<div class="bg-secondary-container/30 w-fit p-2 rounded-lg mb-4 border border-outline-variant">
+<span class="material-symbols-outlined text-primary">picture_as_pdf</span>
+</div>
+<h4 class="font-headline-md text-[20px] text-on-surface mb-2">PDF Suite</h4>
+<p class="font-body-md text-sm text-on-surface-variant">Merge, split, and edit documents with secure encryption.</p>
+</div>
+</div>
+</section>
+<!-- Financial Support Section -->
+<section class="px-margin-mobile md:px-margin-desktop py-xl bg-surface-container-lowest">
+<div class="text-center mb-16">
+<h2 class="font-display-lg-mobile md:text-display-lg text-on-surface mb-4">Professional Stewardship</h2>
+<p class="text-on-surface-variant max-w-xl mx-auto">Help us maintain the craftsmanship of Bairdo. Choose a tier that reflects your commitment to quality tooling.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter items-center">
+<!-- Tier 1: Support -->
+<div class="bg-[#1A1A1A] border border-[#2B1E16] rounded-xl p-lg flex flex-col items-center text-center transition-all hover:-translate-y-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-6 uppercase">Backer</span>
+<div class="text-display-lg-mobile font-bold text-on-surface mb-2">$5<span class="text-body-md font-normal text-on-surface-variant">/mo</span></div>
+<p class="text-body-md text-on-surface-variant mb-8">Access to standard tools with priority processing speeds.</p>
+<ul class="w-full text-left space-y-4 mb-8">
+<li class="flex items-center gap-3 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+                            Standard Support
+                        </li>
+<li class="flex items-center gap-3 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+                            No Advertisements
+                        </li>
+</ul>
+<button class="w-full py-3 border border-outline-variant rounded-lg text-primary hover:bg-surface-container-high transition-colors font-bold">Support Us</button>
+</div>
+<!-- Tier 2: Growth -->
+<div class="bg-[#2B1E16] border-2 border-primary-container/30 rounded-xl p-lg flex flex-col items-center text-center relative transition-all hover:-translate-y-2 wood-texture">
+<div class="absolute -top-4 bg-primary text-on-primary px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Most Recommended</div>
+<span class="font-label-sm text-label-sm text-primary mb-6 uppercase">Supporter</span>
+<div class="text-display-lg-mobile font-bold text-on-surface mb-2">$15<span class="text-body-md font-normal text-on-surface-variant">/mo</span></div>
+<p class="text-body-md text-on-surface-variant mb-8">Enhanced features for independent professionals and small studios.</p>
+<ul class="w-full text-left space-y-4 mb-8">
+<li class="flex items-center gap-3 text-on-surface text-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+                            24/7 Priority Support
+                        </li>
+<li class="flex items-center gap-3 text-on-surface text-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+                            API Integration
+                        </li>
+<li class="flex items-center gap-3 text-on-surface text-sm">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+                            Early Beta Access
+                        </li>
+</ul>
+<button class="w-full py-3 bg-primary text-on-primary rounded-lg font-bold hover:opacity-90 transition-opacity">Select Supporter</button>
+</div>
+<!-- Tier 3: Legacy -->
+<div class="bg-gradient-to-br from-[#3D2B1F] to-[#0D0D0D] border-2 border-primary rounded-xl p-lg flex flex-col items-center text-center relative transition-all hover:-translate-y-1 overflow-hidden shadow-[0_0_40px_rgba(212,163,115,0.15)]">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="h-full w-full wood-texture"></div>
+</div>
+<span class="font-label-sm text-label-sm text-primary-fixed-dim mb-6 uppercase tracking-widest relative z-10">Patron</span>
+<div class="text-display-lg-mobile font-bold text-primary mb-2 relative z-10">$50<span class="text-body-md font-normal text-on-surface-variant">/mo</span></div>
+<p class="text-body-md text-on-surface-variant mb-8 relative z-10">The ultimate stewardship tier for patrons of high-end software development.</p>
+<ul class="w-full text-left space-y-4 mb-8 relative z-10">
+<li class="flex items-center gap-3 text-on-surface text-sm">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            Personal Success Manager
+                        </li>
+<li class="flex items-center gap-3 text-on-surface text-sm">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            Custom Feature Requests
+                        </li>
+<li class="flex items-center gap-3 text-on-surface text-sm">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                            Legacy Badge &amp; Recognition
+                        </li>
+</ul>
+<button class="w-full py-3 bg-white text-background rounded-lg font-bold hover:bg-primary transition-colors relative z-10">Become a Patron</button>
+</div>
+</div>
+</section>
+<!-- Newsletter / CTA Section -->
+<section class="px-margin-mobile md:px-margin-desktop py-xl">
+<div class="bg-surface-container-high rounded-xl p-lg border border-outline-variant flex flex-col md:flex-row items-center justify-between gap-8 wood-texture">
+<div class="max-w-md">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Technical Updates</h2>
+<p class="text-on-surface-variant">Join our monthly brief on architectural improvements and new tool deployments.</p>
+</div>
+<div class="flex w-full md:w-auto gap-2">
+<input class="bg-surface-container border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full md:w-64" placeholder="professional@email.com" type="email"/>
+<button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-bold whitespace-nowrap">Subscribe</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-xl px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-md bg-surface-container border-t border-outline-variant">
+<div class="flex flex-col gap-2">
+<span class="text-body-lg font-headline-md text-primary">Bairdo</span>
+<p class="text-label-sm font-label-sm text-on-surface-variant">© 2024 Bairdo Tool Suite. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">About Us</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Contact Support</a>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">share</span>
+</div>
+<div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">public</span>
+</div>
+</div>
+</footer>
+<script>
+        // Subtle micro-interactions
+        document.querySelectorAll('.inner-glow-primary').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Sticky Nav logic
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-xl', 'bg-background');
+            } else {
+                nav.classList.remove('shadow-xl');
+            }
+        });
+    </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3CWk3-mBly4eJDIzUdA_FOXYX2-L9Yd4",
+    authDomain: "bairdo-e23a3.firebaseapp.com",
+    projectId: "bairdo-e23a3",
+    storageBucket: "bairdo-e23a3.firebasestorage.app",
+    messagingSenderId: "8126805307",
+    appId: "1:8126805307:web:dbf71743bd29a3b73d731e"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    // إخفاء الـ loading spinner
+    document.getElementById('account-loading').style.display = 'none';
+
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const name = user.displayName || user.email?.split('@')[0] || "User";
+    const email = user.email || "Anonymous";
+    const photo = user.photoURL;
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+    // ملء الـ dropdown info
+    document.getElementById('dropdown-name').textContent = name;
+    document.getElementById('dropdown-email').textContent = email;
+    document.getElementById('dropdown-initials').textContent = initials;
+
+    if (photo) {
+      // إظهار الصورة في الزرار
+      const btnImg = document.getElementById('account-photo');
+      btnImg.src = photo;
+      btnImg.style.display = 'block';
+
+      // إظهار الصورة في الـ dropdown
+      const dropImg = document.getElementById('dropdown-photo');
+      dropImg.src = photo;
+      dropImg.style.display = 'block';
+      document.getElementById('dropdown-initials-circle').style.display = 'none';
+    } else {
+      // إظهار الحروف الأولى
+      document.getElementById('account-initials').style.display = 'block';
+    }
+  });
+
+  // Toggle dropdown
+  document.getElementById('account-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const dd = document.getElementById('account-dropdown');
+    dd.classList.toggle('hidden');
+  });
+
+  // أقفل الـ dropdown لو ضغط برا
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('account-menu-wrapper').contains(e.target)) {
+      document.getElementById('account-dropdown').classList.add('hidden');
+    }
+  });
+
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
+</script>
+</body></html>
