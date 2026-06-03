@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Code Editor - Bairdo Toolkit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Hanken+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-container-low": "#1c1b1b","surface-container-high": "#2a2a2a","surface-container": "#201f1f",
+          "primary-container": "#3a2e25","on-primary": "#3a2e25","primary": "#d6c3b6",
+          "on-primary-container": "#a69589","on-surface-variant": "#d1c4bc","surface": "#131313",
+          "on-secondary": "#2f2f40","inverse-primary": "#6a5c51","on-background": "#e5e2e1",
+          "outline-variant": "#4e453f","error": "#ffb4ab","secondary": "#c6c4da","surface-bright": "#393939",
+          "error-container": "#93000a","background": "#121212","outline": "#2d2d3d",
+          "tertiary-container": "#2f2f3f","on-error": "#690005","on-tertiary-container": "#9896aa",
+          "secondary-container": "#464557","surface-variant": "#1e1e2e","on-surface": "#e5e2e1",
+          "surface-container-lowest": "#0e0e0e","surface-container-highest": "#353534",
+          "primary": "#f2be8c","primary-container": "#d4a373","on-primary": "#482904",
+          "on-primary-container": "#5b3912","on-surface-variant": "#d4c4b7","outline-variant": "#50453b",
+          "surface-container-low": "#1c1b1b","surface-container-high": "#2a2a2a",
+          "surface-container": "#20201f","background": "#131313","surface": "#131313",
+          "on-surface": "#e5e2e1","error": "#ffb4ab",
+        },
+        borderRadius: {"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+        spacing: {"stack-lg":"32px","margin-desktop":"48px","margin-mobile":"16px","stack-md":"16px","header-height":"72px","gutter":"24px","stack-sm":"8px","xs":"0.5rem","sm":"1rem","md":"1.5rem"},
+        fontFamily: {"body-sm":["Inter"],"headline-lg":["Hanken Grotesk"],"body-md":["Geist","Inter"],"label-md":["JetBrains Mono"],"display-lg":["Hanken Grotesk"],"headline-md":["Geist"],"label-sm":["JetBrains Mono"]},
+        fontSize: {
+          "body-sm":["14px",{"lineHeight":"20px","fontWeight":"400"}],
+          "headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"600"}],
+          "body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],
+          "label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"500"}],
+          "display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { background-color: #121212; color: #e5e2e1; }
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: #131313; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #3a2e25; border-radius: 3px; }
+  .code-editor-bg { background-color: #1e1e2e; }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block; line-height: 1; text-transform: none;
+    letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr;
+  }
+  /* Code Editor textareas */
+  .code-area {
+    width: 100%; height: 100%; resize: none; outline: none; border: none;
+    background: transparent; color: #e5e2e1; font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; line-height: 1.6; padding: 16px; tab-size: 2;
+    caret-color: #d6c3b6; white-space: pre;
+  }
+  .code-area::selection { background: #3a2e25; color: #f3dfd1; }
+  /* Line numbers */
+  .line-nums {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6;
+    color: #4e453f; padding: 16px 8px; text-align: right; user-select: none;
+    min-width: 36px; background: #0e0e0e; border-right: 1px solid #2d2d3d;
+    overflow: hidden;
+  }
+  /* Preview iframe */
+  #preview-frame { width: 100%; height: 100%; border: none; background: white; }
+  /* Toast */
+  .toast { animation: toastIn 0.25s ease, toastOut 0.25s ease 2.75s forwards; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastOut { to { opacity:0; transform:translateY(-8px); } }
+  /* Mobile tab switching */
+  .mobile-tab { transition: all 0.15s; }
+  .mobile-tab.active { color: #d6c3b6; border-bottom: 2px solid #d6c3b6; }
+  /* Responsive editor layout */
+  #editor-workspace { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  #code-panes { display: grid; }
+  #preview-pane { flex: 1; }
+  /* Device preview frames */
+  .preview-mobile { max-width: 375px; margin: 0 auto; height: 100%; }
+  .preview-tablet { max-width: 768px; margin: 0 auto; height: 100%; }
+  /* Resize handle */
+  #resize-handle { cursor: row-resize; background: #2d2d3d; height: 5px; flex-shrink: 0; }
+  #resize-handle:hover { background: #d6c3b6; }
+  /* Active line highlight on focus */
+  .pane-active { border-top: 2px solid #d6c3b6 !important; }
+  /* Status bar */
+  #status-bar span { transition: color 0.2s; }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+</style>
+</head>
+<body class="font-body-md text-body-md selection:bg-primary-container selection:text-primary overflow-hidden h-screen flex flex-col">
+
+<!-- TopNavBar -->
+<nav class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-outline-variant flex-shrink-0">
+<div class="flex items-center gap-8">
+<span class="text-headline-md font-headline-md text-primary dark:text-primary tracking-tighter">Bairdo</span>
+<!-- Desktop Links -->
+<div class="hidden lg:flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Image.html">Images</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="video.html">Video</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="audio.html">Audio</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Pdf.html">PDF</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Zip.html">ZIP</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Qrcode.html">QR</a>
+<a class="text-primary border-b-2 border-primary font-bold pb-1 font-body-md text-body-md" href="code.html">Code</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="YouTube_Downloader.html">YouTube</a>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<!-- Hamburger Button (mobile only) -->
+<button id="hamburger-btn" class="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-[5px] focus:outline-none" aria-label="Menu">
+  <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+  <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+  <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+</button>
+<!-- Account Avatar -->
+<div class="relative" id="account-menu-wrapper">
+  <button id="account-btn" class="w-10 h-10 rounded-full bg-primary-container border-2 border-primary flex items-center justify-center overflow-hidden focus:outline-none hover:brightness-110 transition-all" style="border-radius:9999px;min-width:40px;min-height:40px;">
+    <img id="account-photo" src="" alt="profile" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;display:none;"/>
+    <span id="account-initials" class="text-on-primary font-bold text-sm" style="display:none;"></span>
+    <span id="account-loading" class="material-symbols-outlined text-primary text-[18px]" style="animation:spin 1s linear infinite;">progress_activity</span>
+  </button>
+  <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-surface-container-high border border-outline-variant rounded-xl shadow-2xl overflow-hidden" style="z-index:9999;">
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-outline-variant">
+      <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-primary" style="border-radius:9999px;">
+        <img id="dropdown-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:9999px;"/>
+        <div id="dropdown-initials-circle" class="w-full h-full bg-primary-container flex items-center justify-center" style="display:flex;">
+          <span id="dropdown-initials" class="text-on-primary font-bold text-sm"></span>
+        </div>
+      </div>
+      <div class="min-w-0">
+        <p id="dropdown-name" class="text-on-surface font-bold text-sm truncate"></p>
+        <p id="dropdown-email" class="text-on-surface-variant text-xs truncate mt-0.5"></p>
+      </div>
+    </div>
+    <button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-3 text-error hover:bg-error/10 transition-colors text-sm font-bold">
+      <span class="material-symbols-outlined text-[18px]">logout</span>
+      Log Out
+    </button>
+  </div>
+</div>
+</div>
+</nav>
+<!-- Mobile Drawer Overlay -->
+<div id="drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden" style="transition:opacity 0.3s;"></div>
+<!-- Mobile Drawer -->
+<div id="mobile-drawer" class="fixed top-0 left-0 h-full w-72 bg-surface-container-low border-r border-outline-variant z-50 lg:hidden flex flex-col" style="transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">
+  <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant">
+    <span class="text-headline-md font-headline-md text-primary tracking-tighter">Bairdo</span>
+    <button id="drawer-close" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors">
+      <span class="material-symbols-outlined text-on-surface-variant text-[20px]">close</span>
+    </button>
+  </div>
+  <nav class="flex flex-col px-4 py-4 gap-1 flex-grow">
+    <a href="Image.html" class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md">
+      <span class="material-symbols-outlined text-[20px]">image</span> Images
+    </a>
+    <a href="video.html" class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md">
+      <span class="material-symbols-outlined text-[20px]">movie</span> Video
+    </a>
+    <a href="audio.html" class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md">
+      <span class="material-symbols-outlined text-[20px]">music_note</span> Audio
+    </a>
+    <a href="Pdf.html" class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md">
+      <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span> PDF
+    </a>
+    <a href="Zip.html" class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md">
+      <span class="material-symbols-outlined text-[20px]">folder_zip</span> ZIP
+    </a>
+    <a href="Qrcode.html" class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md">
+      <span class="material-symbols-outlined text-[20px]">qr_code</span> QR Code
+    </a>
+    <a href="code.html" class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-surface-container font-bold font-body-md">
+      <span class="material-symbols-outlined text-[20px]">code</span> Code
+    </a>
+    <a href="YouTube_Downloader.html" class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md">
+      <span class="material-symbols-outlined text-[20px]">play_circle</span> YouTube
+    </a>
+  </nav>
+  <div class="px-4 py-4 border-t border-outline-variant">
+    <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container">
+      <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-primary" style="border-radius:9999px;">
+        <img id="drawer-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:9999px;"/>
+        <div id="drawer-initials-circle" class="w-full h-full bg-primary-container flex items-center justify-center">
+          <span id="drawer-initials" class="text-on-primary font-bold text-xs"></span>
+        </div>
+      </div>
+      <div class="min-w-0 flex-grow">
+        <p id="drawer-name" class="text-on-surface font-bold text-sm truncate"></p>
+        <p id="drawer-email" class="text-on-surface-variant text-xs truncate"></p>
+      </div>
+    </div>
+    <button id="drawer-logout" class="mt-2 w-full flex items-center gap-3 px-4 py-3 rounded-lg text-error hover:bg-error/10 transition-colors text-sm font-bold">
+      <span class="material-symbols-outlined text-[18px]">logout</span>
+      Log Out
+    </button>
+  </div>
+</div>
+
+<!-- IDE Controls Bar -->
+<div class="flex-shrink-0 bg-surface-variant px-margin-mobile md:px-margin-desktop py-stack-sm flex flex-wrap gap-2 justify-between items-center border-b border-outline z-40">
+  <div class="flex flex-wrap gap-2 items-center">
+    <span class="font-label-md text-primary mr-1 hidden sm:inline">PROJECT_V1.0</span>
+    <div class="h-4 w-px bg-outline mx-1 hidden sm:block"></div>
+    <button id="btn-dl-html" class="flex items-center gap-1.5 px-3 py-1.5 bg-primary-container text-white font-label-md rounded-lg hover:brightness-110 transition-all border border-transparent active:opacity-80">
+      <span class="material-symbols-outlined text-[16px]">html</span>
+      <span class="hidden sm:inline">DOWNLOAD HTML</span><span class="sm:hidden">HTML</span>
+    </button>
+    <button id="btn-dl-css" class="flex items-center gap-1.5 px-3 py-1.5 border border-primary-container text-on-surface font-label-md rounded-lg hover:bg-primary-container/20 transition-all">
+      <span class="material-symbols-outlined text-[16px]">css</span>
+      <span class="hidden sm:inline">DOWNLOAD CSS</span><span class="sm:hidden">CSS</span>
+    </button>
+    <button id="btn-dl-js" class="flex items-center gap-1.5 px-3 py-1.5 border border-primary-container text-on-surface font-label-md rounded-lg hover:bg-primary-container/20 transition-all">
+      <span class="material-symbols-outlined text-[16px]">javascript</span>
+      <span class="hidden sm:inline">DOWNLOAD JS</span><span class="sm:hidden">JS</span>
+    </button>
+  </div>
+  <button id="btn-dl-zip" class="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary font-label-md font-bold rounded-lg hover:brightness-95 transition-all shadow-lg">
+    <span class="material-symbols-outlined text-[18px]">folder_zip</span>
+    <span class="hidden sm:inline">DOWNLOAD ALL (.ZIP)</span><span class="sm:hidden">ZIP</span>
+  </button>
+</div>
+
+<!-- Mobile tab switcher (code panels only visible on mobile one at a time) -->
+<div class="md:hidden flex-shrink-0 flex bg-surface border-b border-outline">
+  <button data-tab="html" class="mobile-tab active flex-1 py-2 font-label-md text-center text-[11px] flex items-center justify-center gap-1">
+    <span class="material-symbols-outlined text-orange-400 text-[14px]">html</span> HTML
+  </button>
+  <button data-tab="css" class="mobile-tab flex-1 py-2 font-label-md text-center text-on-surface-variant text-[11px] flex items-center justify-center gap-1">
+    <span class="material-symbols-outlined text-blue-400 text-[14px]">css</span> CSS
+  </button>
+  <button data-tab="js" class="mobile-tab flex-1 py-2 font-label-md text-center text-on-surface-variant text-[11px] flex items-center justify-center gap-1">
+    <span class="material-symbols-outlined text-yellow-400 text-[14px]">javascript</span> JS
+  </button>
+  <button data-tab="preview" class="mobile-tab flex-1 py-2 font-label-md text-center text-on-surface-variant text-[11px] flex items-center justify-center gap-1">
+    <span class="material-symbols-outlined text-[14px]">visibility</span> Preview
+  </button>
+</div>
+
+<!-- Main Editor Workspace -->
+<div id="editor-workspace" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+
+  <!-- Code Panes (top half on desktop) -->
+  <div id="code-panes-wrapper" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="code-panes" style="display:grid;grid-template-columns:1fr 1fr 1fr;flex:1;overflow:hidden;border-bottom:1px solid #2d2d3d;">
+
+      <!-- HTML Editor -->
+      <div id="pane-html" class="flex flex-col border-r border-outline bg-surface-container-lowest overflow-hidden" style="min-height:0;">
+        <div class="flex items-center justify-between px-stack-md py-2 bg-surface border-b border-outline flex-shrink-0">
+          <span class="font-label-md flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-orange-400 text-[16px]">html</span> index.html
+          </span>
+          <div class="flex gap-2 items-center">
+            <span id="html-chars" class="text-[10px] text-on-surface-variant font-label-md">0 chars</span>
+            <span class="material-symbols-outlined text-[14px] text-on-surface-variant cursor-pointer hover:text-primary" id="btn-format-html" title="Format HTML">auto_fix_high</span>
+          </div>
+        </div>
+        <div class="flex flex-grow overflow-hidden" style="min-height:0;">
+          <div id="html-lines" class="line-nums custom-scrollbar overflow-hidden">1</div>
+          <textarea id="html-editor" class="code-area custom-scrollbar flex-grow" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+        </div>
+      </div>
+
+      <!-- CSS Editor -->
+      <div id="pane-css" class="flex flex-col border-r border-outline bg-surface-container-lowest overflow-hidden" style="min-height:0;">
+        <div class="flex items-center justify-between px-stack-md py-2 bg-surface border-b border-outline flex-shrink-0">
+          <span class="font-label-md flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-blue-400 text-[16px]">css</span> style.css
+          </span>
+          <div class="flex gap-2 items-center">
+            <span id="css-chars" class="text-[10px] text-on-surface-variant font-label-md">0 chars</span>
+            <span class="material-symbols-outlined text-[14px] text-on-surface-variant cursor-pointer hover:text-primary" id="btn-clear-css" title="Clear">delete_sweep</span>
+          </div>
+        </div>
+        <div class="flex flex-grow overflow-hidden" style="min-height:0;">
+          <div id="css-lines" class="line-nums custom-scrollbar overflow-hidden">1</div>
+          <textarea id="css-editor" class="code-area custom-scrollbar flex-grow" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+        </div>
+      </div>
+
+      <!-- JS Editor -->
+      <div id="pane-js" class="flex flex-col bg-surface-container-lowest overflow-hidden" style="min-height:0;">
+        <div class="flex items-center justify-between px-stack-md py-2 bg-surface border-b border-outline flex-shrink-0">
+          <span class="font-label-md flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-yellow-400 text-[16px]">javascript</span> main.js
+          </span>
+          <div class="flex gap-2 items-center">
+            <span id="js-chars" class="text-[10px] text-on-surface-variant font-label-md">0 chars</span>
+            <span class="material-symbols-outlined text-[14px] text-on-surface-variant cursor-pointer hover:text-primary" id="btn-clear-js" title="Clear">delete_sweep</span>
+          </div>
+        </div>
+        <div class="flex flex-grow overflow-hidden" style="min-height:0;">
+          <div id="js-lines" class="line-nums custom-scrollbar overflow-hidden">1</div>
+          <textarea id="js-editor" class="code-area custom-scrollbar flex-grow" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resize Handle -->
+    <div id="resize-handle" class="flex-shrink-0 flex items-center justify-center gap-2" style="height:5px;background:#2d2d3d;cursor:row-resize;">
+      <div style="width:30px;height:2px;background:#4e453f;border-radius:1px;"></div>
+    </div>
+
+    <!-- Live Preview Pane -->
+    <div id="preview-pane" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
+      <div class="bg-surface flex items-center justify-between px-stack-md py-2 border-b border-outline flex-shrink-0">
+        <div class="flex items-center gap-4">
+          <span class="font-label-md text-primary uppercase font-bold tracking-widest flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">visibility</span>
+            <span class="hidden sm:inline">Live Preview</span>
+          </span>
+          <div class="flex gap-2 text-on-surface-variant items-center">
+            <!-- Device toggle -->
+            <button id="btn-device-desktop" class="flex items-center gap-1 px-2 py-1 rounded font-label-md text-[10px] text-primary bg-primary-container/30" title="Desktop">
+              <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
+            </button>
+            <button id="btn-device-tablet" class="flex items-center gap-1 px-2 py-1 rounded font-label-md text-[10px] hover:text-primary" title="Tablet">
+              <span class="material-symbols-outlined text-[16px]">tablet</span>
+            </button>
+            <button id="btn-device-mobile" class="flex items-center gap-1 px-2 py-1 rounded font-label-md text-[10px] hover:text-primary" title="Mobile">
+              <span class="material-symbols-outlined text-[16px]">smartphone</span>
+            </button>
+            <div class="w-px h-4 bg-outline mx-1"></div>
+            <span class="material-symbols-outlined text-[16px] cursor-pointer hover:text-primary" id="btn-refresh" title="Refresh Preview">refresh</span>
+            <span class="material-symbols-outlined text-[16px] cursor-pointer hover:text-primary" id="btn-open-new" title="Open in New Tab">open_in_new</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="preview-status" class="font-label-md text-[10px] text-on-surface-variant">READY</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-error inline-block"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" id="live-dot"></span>
+        </div>
+      </div>
+      <div id="preview-container" style="flex:1;overflow:auto;background:#fdfdfd;display:flex;align-items:flex-start;justify-content:center;">
+        <iframe id="preview-frame" style="width:100%;height:100%;border:none;background:white;" sandbox="allow-scripts allow-same-origin allow-forms allow-modals"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status Bar -->
+<div id="status-bar" class="flex-shrink-0 bg-surface-container-lowest border-t border-outline flex items-center justify-between px-margin-mobile md:px-margin-desktop py-1 text-[10px] font-label-md text-on-surface-variant">
+  <div class="flex gap-4 items-center">
+    <span id="status-ln-col">Ln 1, Col 1</span>
+    <span id="status-lang" class="text-primary">HTML</span>
+    <span id="status-encoding">UTF-8</span>
+  </div>
+  <div class="flex gap-4 items-center">
+    <span id="status-auto-update" class="text-green-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span> Auto-update ON</span>
+    <span id="status-total-size">0 B</span>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="flex-shrink-0 bg-background border-t border-outline-variant w-full py-stack-sm flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop gap-2 hidden md:flex">
+  <div class="flex flex-col md:flex-row items-center gap-stack-md">
+    <span class="font-label-md text-primary font-bold">Bairdo Toolkit</span>
+    <p class="font-body-sm text-on-surface-variant">© 2024 Bairdo Toolkit. All rights reserved.</p>
+  </div>
+  <div class="flex gap-gutter">
+    <a class="font-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Privacy Policy</a>
+    <a class="font-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Terms of Service</a>
+    <a class="font-body-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Documentation</a>
+  </div>
+</footer>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-[200] pointer-events-none"></div>
+
+<script>
+// ─── Default starter code ──────────────────────────────────────────────────────
+const DEFAULT_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Project</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Hello Bairdo</h1>
+    <p>Professional Toolkit Editor</p>
+    <button id="app-btn">Explore</button>
+  </main>
+  <script src="main.js"><\/script>
+</body>
+</html>`;
+
+const DEFAULT_CSS = `body {
+  background: #121212;
+  color: #e5e2e1;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 40px;
+  max-width: 600px;
+}
+
+h1 {
+  color: #d6c3b6;
+  letter-spacing: -1px;
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+p {
+  color: #9a8f87;
+  margin-bottom: 32px;
+}
+
+button {
+  padding: 12px 28px;
+  background: #3a2e25;
+  color: #d6c3b6;
+  border: 1px solid #d6c3b6;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background: #d6c3b6;
+  color: #3a2e25;
+}`;
+
+const DEFAULT_JS = `// Initialize Bairdo Logic
+const button = document.getElementById('app-btn');
+
+button.addEventListener('click', () => {
+  alert('System Online — Bairdo Editor Active');
+});
+
+// Architectural Warmth logic
+function renderFrame() {
+  /* Update preview engine */
+  console.log('Frame rendered');
+}`;
+
+// ─── DOM refs ──────────────────────────────────────────────────────────────────
+const htmlEditor = document.getElementById('html-editor');
+const cssEditor  = document.getElementById('css-editor');
+const jsEditor   = document.getElementById('js-editor');
+const previewFrame = document.getElementById('preview-frame');
+const htmlLines  = document.getElementById('html-lines');
+const cssLines   = document.getElementById('css-lines');
+const jsLines    = document.getElementById('js-lines');
+const htmlChars  = document.getElementById('html-chars');
+const cssChars   = document.getElementById('css-chars');
+const jsChars    = document.getElementById('js-chars');
+const statusLnCol = document.getElementById('status-ln-col');
+const statusLang  = document.getElementById('status-lang');
+const statusTotalSize = document.getElementById('status-total-size');
+const previewStatus = document.getElementById('preview-status');
+
+// ─── Init content ──────────────────────────────────────────────────────────────
+htmlEditor.value = DEFAULT_HTML;
+cssEditor.value  = DEFAULT_CSS;
+jsEditor.value   = DEFAULT_JS;
+updateAllLines();
+updatePreview();
+
+// ─── Preview Engine ────────────────────────────────────────────────────────────
+let previewTimer = null;
+function updatePreview() {
+  const html = htmlEditor.value;
+  const css  = cssEditor.value;
+  const js   = jsEditor.value;
+
+  // Inject CSS and JS into the HTML
+  let combined = html;
+  // Replace <link rel="stylesheet" href="style.css"> with inline <style>
+  combined = combined.replace(/<link[^>]+href=["']style\.css["'][^>]*>/gi,
+    `<style>\n${css}\n</style>`);
+  // Replace <script src="main.js"> with inline <script>
+  combined = combined.replace(/<script[^>]+src=["']main\.js["'][^>]*><\/script>/gi,
+    `<script>\n${js}\n<\/script>`);
+  // If no link/script tags found but there's CSS/JS, inject anyway
+  if (!combined.includes('<style>') && css.trim()) {
+    combined = combined.replace('</head>', `<style>\n${css}\n</style>\n</head>`);
+  }
+  if (!combined.includes(js.substring(0, 20)) && js.trim()) {
+    combined = combined.replace('</body>', `<script>\n${js}\n<\/script>\n</body>`);
+  }
+
+  previewStatus.textContent = 'UPDATING…';
+  previewStatus.classList.add('text-yellow-400');
+  previewStatus.classList.remove('text-on-surface-variant', 'text-green-400');
+
+  const blob = new Blob([combined], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  previewFrame.onload = () => {
+    URL.revokeObjectURL(url);
+    previewStatus.textContent = 'LIVE';
+    previewStatus.classList.remove('text-yellow-400');
+    previewStatus.classList.add('text-green-400');
+    updateTotalSize();
+  };
+  previewFrame.src = url;
+}
+
+function schedulePreviewUpdate() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(updatePreview, 600);
+}
+
+// ─── Line numbers ──────────────────────────────────────────────────────────────
+function updateLines(textarea, linesEl, charsEl) {
+  const lines = textarea.value.split('\n').length;
+  linesEl.innerHTML = Array.from({length: lines}, (_, i) => i+1).join('<br>');
+  // Sync scroll
+  linesEl.scrollTop = textarea.scrollTop;
+  charsEl.textContent = textarea.value.length.toLocaleString() + ' chars';
+}
+
+function updateAllLines() {
+  updateLines(htmlEditor, htmlLines, htmlChars);
+  updateLines(cssEditor, cssLines, cssChars);
+  updateLines(jsEditor, jsLines, jsChars);
+}
+
+// Sync line number scroll with textarea
+[htmlEditor, cssEditor, jsEditor].forEach(ed => {
+  ed.addEventListener('scroll', () => {
+    const linesEl = ed === htmlEditor ? htmlLines : ed === cssEditor ? cssLines : jsLines;
+    linesEl.scrollTop = ed.scrollTop;
+  });
+});
+
+// ─── Input handlers ────────────────────────────────────────────────────────────
+let activeLang = 'HTML';
+function handleInput(textarea, linesEl, charsEl, lang) {
+  updateLines(textarea, linesEl, charsEl);
+  activeLang = lang;
+  statusLang.textContent = lang;
+  schedulePreviewUpdate();
+  // Caret position
+  const pos = textarea.selectionStart;
+  const textUpToCaret = textarea.value.substring(0, pos);
+  const lines = textUpToCaret.split('\n');
+  statusLnCol.textContent = `Ln ${lines.length}, Col ${lines[lines.length-1].length+1}`;
+}
+
+htmlEditor.addEventListener('input', () => handleInput(htmlEditor, htmlLines, htmlChars, 'HTML'));
+cssEditor.addEventListener('input',  () => handleInput(cssEditor,  cssLines,  cssChars,  'CSS'));
+jsEditor.addEventListener('input',   () => handleInput(jsEditor,   jsLines,   jsChars,   'JS'));
+
+// Tab key support
+[htmlEditor, cssEditor, jsEditor].forEach(ed => {
+  ed.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = ed.selectionStart, end = ed.selectionEnd;
+      ed.value = ed.value.substring(0, start) + '  ' + ed.value.substring(end);
+      ed.selectionStart = ed.selectionEnd = start + 2;
+      ed.dispatchEvent(new Event('input'));
+    }
+    // Ctrl+S / Cmd+S → refresh
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      updatePreview();
+      toast('Preview refreshed ✓');
+    }
+  });
+});
+
+// Status bar on click/keyup
+[htmlEditor, cssEditor, jsEditor].forEach(ed => {
+  ed.addEventListener('click', () => {
+    const pos = ed.selectionStart;
+    const textUpToCaret = ed.value.substring(0, pos);
+    const lines = textUpToCaret.split('\n');
+    statusLnCol.textContent = `Ln ${lines.length}, Col ${lines[lines.length-1].length+1}`;
+    statusLang.textContent = ed === htmlEditor ? 'HTML' : ed === cssEditor ? 'CSS' : 'JS';
+  });
+});
+
+// ─── Total size ────────────────────────────────────────────────────────────────
+function updateTotalSize() {
+  const bytes = new Blob([htmlEditor.value + cssEditor.value + jsEditor.value]).size;
+  statusTotalSize.textContent = bytes < 1024 ? bytes + ' B' : (bytes/1024).toFixed(1) + ' KB';
+}
+updateTotalSize();
+
+// ─── Download functions ────────────────────────────────────────────────────────
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function toast(msg, type='ok') {
+  const el = document.createElement('div');
+  const col = type === 'error' ? 'bg-error-container text-error' : 'bg-primary-container text-primary';
+  el.className = `toast px-5 py-3 rounded font-label-md text-[11px] ${col} shadow-xl pointer-events-auto`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3100);
+}
+
+document.getElementById('btn-dl-html').addEventListener('click', () => {
+  downloadFile(htmlEditor.value, 'index.html', 'text/html');
+  toast('Downloaded index.html');
+});
+
+document.getElementById('btn-dl-css').addEventListener('click', () => {
+  downloadFile(cssEditor.value, 'style.css', 'text/css');
+  toast('Downloaded style.css');
+});
+
+document.getElementById('btn-dl-js').addEventListener('click', () => {
+  downloadFile(jsEditor.value, 'main.js', 'text/javascript');
+  toast('Downloaded main.js');
+});
+
+// ZIP download using JSZip CDN
+document.getElementById('btn-dl-zip').addEventListener('click', async () => {
+  toast('Preparing ZIP…');
+  try {
+    // Dynamic load JSZip
+    if (!window.JSZip) {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    const zip = new JSZip();
+    zip.file('index.html', htmlEditor.value);
+    zip.file('style.css',  cssEditor.value);
+    zip.file('main.js',    jsEditor.value);
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'bairdo_project.zip'; a.click();
+    URL.revokeObjectURL(url);
+    toast('Downloaded bairdo_project.zip ✓');
+  } catch(e) {
+    // Fallback: download as single combined HTML
+    const html = htmlEditor.value
+      .replace(/<link[^>]+href=["']style\.css["'][^>]*>/gi, `<style>\n${cssEditor.value}\n</style>`)
+      .replace(/<script[^>]+src=["']main\.js["'][^>]*><\/script>/gi, `<script>\n${jsEditor.value}\n<\/script>`);
+    downloadFile(html, 'bairdo_project.html', 'text/html');
+    toast('Downloaded as combined HTML (ZIP not available)');
+  }
+});
+
+// ─── Refresh / Open in new tab ─────────────────────────────────────────────────
+document.getElementById('btn-refresh').addEventListener('click', () => {
+  updatePreview();
+  toast('Preview refreshed');
+});
+
+document.getElementById('btn-open-new').addEventListener('click', () => {
+  const html = htmlEditor.value
+    .replace(/<link[^>]+href=["']style\.css["'][^>]*>/gi, `<style>\n${cssEditor.value}\n</style>`)
+    .replace(/<script[^>]+src=["']main\.js["'][^>]*><\/script>/gi, `<script>\n${jsEditor.value}\n<\/script>`);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  toast('Opened in new tab');
+});
+
+// ─── Device preview ────────────────────────────────────────────────────────────
+const deviceBtns = {
+  desktop: document.getElementById('btn-device-desktop'),
+  tablet:  document.getElementById('btn-device-tablet'),
+  mobile:  document.getElementById('btn-device-mobile'),
+};
+const previewContainer = document.getElementById('preview-container');
+
+function setDevice(mode) {
+  Object.values(deviceBtns).forEach(b => {
+    b.classList.remove('text-primary','bg-primary-container/30');
+    b.classList.add('hover:text-primary');
+  });
+  deviceBtns[mode].classList.add('text-primary','bg-primary-container/30');
+
+  const frame = document.getElementById('preview-frame');
+  if (mode === 'desktop') {
+    frame.style.width = '100%';
+    previewContainer.style.padding = '0';
+    previewContainer.style.background = '#fdfdfd';
+  } else if (mode === 'tablet') {
+    frame.style.width = '768px';
+    frame.style.maxWidth = '100%';
+    previewContainer.style.padding = '16px';
+    previewContainer.style.background = '#1e1e2e';
+  } else {
+    frame.style.width = '375px';
+    frame.style.maxWidth = '100%';
+    previewContainer.style.padding = '16px';
+    previewContainer.style.background = '#1e1e2e';
+  }
+}
+
+deviceBtns.desktop.addEventListener('click', () => setDevice('desktop'));
+deviceBtns.tablet.addEventListener('click',  () => setDevice('tablet'));
+deviceBtns.mobile.addEventListener('click',  () => setDevice('mobile'));
+
+// ─── Resize handle (drag to resize editor/preview split) ───────────────────────
+const resizeHandle = document.getElementById('resize-handle');
+const codeWrapper  = document.getElementById('code-panes-wrapper');
+let isResizing = false, resizeStartY = 0, resizeStartH = 0;
+
+resizeHandle.addEventListener('mousedown', e => {
+  isResizing = true;
+  resizeStartY = e.clientY;
+  const codePanes = document.getElementById('code-panes');
+  resizeStartH = codePanes.offsetHeight;
+  document.body.style.cursor = 'row-resize';
+  document.body.style.userSelect = 'none';
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isResizing) return;
+  const delta = e.clientY - resizeStartY;
+  const codePanes = document.getElementById('code-panes');
+  const newH = Math.max(80, Math.min(resizeStartH + delta, window.innerHeight * 0.75));
+  codePanes.style.flex = 'none';
+  codePanes.style.height = newH + 'px';
+});
+
+document.addEventListener('mouseup', () => {
+  if (isResizing) { isResizing = false; document.body.style.cursor = ''; document.body.style.userSelect = ''; }
+});
+
+// ─── Mobile tab switching ──────────────────────────────────────────────────────
+const mobileTabs = document.querySelectorAll('[data-tab]');
+const paneHtml = document.getElementById('pane-html');
+const paneCss  = document.getElementById('pane-css');
+const paneJs   = document.getElementById('pane-js');
+const previewPane = document.getElementById('preview-pane');
+const codePanesEl = document.getElementById('code-panes');
+const codeWrapper2 = document.getElementById('code-panes-wrapper');
+
+function isMobile() { return window.innerWidth < 768; }
+
+function applyMobileLayout(tab) {
+  if (!isMobile()) return;
+  paneHtml.style.display = tab === 'html' ? 'flex' : 'none';
+  paneCss.style.display  = tab === 'css'  ? 'flex' : 'none';
+  paneJs.style.display   = tab === 'js'   ? 'flex' : 'none';
+  if (tab === 'preview') {
+    codePanesEl.style.display = 'none';
+    resizeHandle.style.display = 'none';
+    previewPane.style.display = 'flex';
+    previewPane.style.flex = '1';
+  } else {
+    codePanesEl.style.display = 'grid';
+    codePanesEl.style.gridTemplateColumns = '1fr';
+    resizeHandle.style.display = 'flex';
+    previewPane.style.display = 'none';
+  }
+}
+
+mobileTabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    mobileTabs.forEach(b => { b.classList.remove('active'); b.classList.add('text-on-surface-variant'); });
+    btn.classList.add('active'); btn.classList.remove('text-on-surface-variant');
+    applyMobileLayout(btn.dataset.tab);
+  });
+});
+
+// On load, apply mobile layout if needed
+function handleResize() {
+  if (isMobile()) {
+    codePanesEl.style.gridTemplateColumns = '1fr';
+    applyMobileLayout('html'); // default to html tab on mobile
+  } else {
+    codePanesEl.style.gridTemplateColumns = '1fr 1fr 1fr';
+    paneHtml.style.display = ''; paneCss.style.display = ''; paneJs.style.display = '';
+    previewPane.style.display = 'flex'; resizeHandle.style.display = 'flex';
+  }
+}
+window.addEventListener('resize', handleResize);
+handleResize();
+
+// ─── Format HTML button ────────────────────────────────────────────────────────
+document.getElementById('btn-format-html').addEventListener('click', () => {
+  // Simple indent formatter
+  try {
+    let formatted = htmlEditor.value
+      .replace(/>\s*</g, '>\n<')
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l)
+      .join('\n');
+    htmlEditor.value = formatted;
+    updateLines(htmlEditor, htmlLines, htmlChars);
+    schedulePreviewUpdate();
+    toast('HTML formatted');
+  } catch(e) { toast('Format failed', 'error'); }
+});
+
+document.getElementById('btn-clear-css').addEventListener('click', () => {
+  if (confirm('Clear CSS?')) { cssEditor.value = ''; updateLines(cssEditor, cssLines, cssChars); schedulePreviewUpdate(); }
+});
+document.getElementById('btn-clear-js').addEventListener('click', () => {
+  if (confirm('Clear JS?')) { jsEditor.value = ''; updateLines(jsEditor, jsLines, jsChars); schedulePreviewUpdate(); }
+});
+
+// ─── Keyboard shortcuts hint ───────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); updatePreview(); toast('Preview updated ✓'); }
+});
+</script>
+<script>
+  // Sticky Nav scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    if (nav) {
+      if (window.scrollY > 20) nav.classList.add('shadow-xl','bg-background');
+      else nav.classList.remove('shadow-xl');
+    }
+  });
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3CWk3-mBly4eJDIzUdA_FOXYX2-L9Yd4",
+    authDomain: "bairdo-e23a3.firebaseapp.com",
+    projectId: "bairdo-e23a3",
+    storageBucket: "bairdo-e23a3.firebasestorage.app",
+    messagingSenderId: "8126805307",
+    appId: "1:8126805307:web:dbf71743bd29a3b73d731e"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    document.getElementById('account-loading').style.display = 'none';
+    if (!user) { window.location.href = "index.html"; return; }
+    const name = user.displayName || user.email?.split('@')[0] || "User";
+    const email = user.email || "Anonymous";
+    const photo = user.photoURL;
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('dropdown-name').textContent = name;
+    document.getElementById('dropdown-email').textContent = email;
+    document.getElementById('dropdown-initials').textContent = initials;
+    document.getElementById('drawer-name').textContent = name;
+    document.getElementById('drawer-email').textContent = email;
+    document.getElementById('drawer-initials').textContent = initials;
+    if (photo) {
+      const btnImg = document.getElementById('account-photo');
+      btnImg.src = photo; btnImg.style.display = 'block';
+      const dropImg = document.getElementById('dropdown-photo');
+      dropImg.src = photo; dropImg.style.display = 'block';
+      document.getElementById('dropdown-initials-circle').style.display = 'none';
+      const drawerImg = document.getElementById('drawer-photo');
+      drawerImg.src = photo; drawerImg.style.display = 'block';
+      document.getElementById('drawer-initials-circle').style.display = 'none';
+    } else {
+      document.getElementById('account-initials').style.display = 'block';
+    }
+  });
+
+  document.getElementById('account-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('account-dropdown').classList.toggle('hidden');
+  });
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('account-menu-wrapper').contains(e.target))
+      document.getElementById('account-dropdown').classList.add('hidden');
+  });
+  document.getElementById('logout-btn').addEventListener('click', async (e) => {
+    e.stopPropagation(); await signOut(auth); window.location.href = "index.html";
+  });
+  document.getElementById('drawer-logout').addEventListener('click', async () => {
+    await signOut(auth); window.location.href = "index.html";
+  });
+
+  const drawer = document.getElementById('mobile-drawer');
+  const overlay = document.getElementById('drawer-overlay');
+  function openDrawer() { drawer.style.transform = 'translateX(0)'; overlay.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeDrawer() { drawer.style.transform = 'translateX(-100%)'; overlay.classList.add('hidden'); document.body.style.overflow = ''; }
+  document.getElementById('hamburger-btn').addEventListener('click', openDrawer);
+  document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+</script>
+</body>
+</html>
