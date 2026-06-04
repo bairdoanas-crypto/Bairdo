@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bairdo | ZIP Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-bright":"#393939","primary-container":"#d4a373","on-primary-fixed":"#2c1600",
+          "inverse-on-surface":"#313030","on-primary-container":"#5b3912","on-error":"#690005",
+          "primary-fixed-dim":"#f0bd8b","surface-container":"#20201f","surface-container-high":"#2a2a2a",
+          "on-tertiary":"#4a2806","on-tertiary-fixed":"#2e1500","error-container":"#93000a",
+          "on-secondary":"#3f2c20","secondary-container":"#574335","surface-container-highest":"#353535",
+          "error":"#ffb4ab","on-surface":"#e5e2e1","tertiary-fixed":"#ffdcc2","tertiary":"#f5bc8f",
+          "on-secondary-fixed":"#28180d","background":"#131313","surface-tint":"#f0bd8b",
+          "inverse-surface":"#e5e2e1","surface-container-lowest":"#0e0e0e","on-background":"#e5e2e1",
+          "on-primary-fixed-variant":"#623f18","primary-fixed":"#ffdcbd","primary":"#f2be8c",
+          "outline-variant":"#50453b","on-secondary-fixed-variant":"#574335","on-secondary-container":"#ccb09f",
+          "outline":"#9c8e82","on-tertiary-fixed-variant":"#653e1b","surface-dim":"#131313",
+          "secondary-fixed-dim":"#dec1af","secondary-fixed":"#fbddca","on-surface-variant":"#d4c4b7",
+          "on-tertiary-container":"#5d3715","tertiary-fixed-dim":"#f4bb8e","surface-variant":"#353535",
+          "secondary":"#dec1af","surface":"#131313","on-error-container":"#ffdad6",
+          "inverse-primary":"#7d562d","tertiary-container":"#d7a176","surface-container-low":"#1c1b1b",
+          "on-primary":"#482904"
+        },
+        "borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+        "spacing":{
+          "margin-mobile":"16px","xs":"0.5rem","gutter":"24px","md":"1.5rem","xl":"4rem",
+          "sm":"1rem","base":"4px","lg":"2.5rem","margin-desktop":"48px"
+        },
+        "fontFamily":{
+          "body-md":["Geist"],"headline-md":["Geist"],"display-lg-mobile":["Geist"],
+          "display-lg":["Geist"],"label-sm":["JetBrains Mono"],"body-lg":["Geist"]
+        },
+        "fontSize":{
+          "body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],
+          "headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],
+          "display-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],
+          "display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}],
+          "label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"500"}],
+          "body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .wood-texture{background-image:linear-gradient(90deg,rgba(255,255,255,0.01) 1px,transparent 1px);background-size:4px 100%;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  .spin{animation:spin 1s linear infinite;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .fade-in{animation:fadeIn 0.25s ease forwards;}
+  .drop-active{border-color:#f2be8c!important;background-color:rgba(242,190,140,0.05)!important;}
+  .amber-glow:hover{box-shadow:0 0 20px rgba(242,190,140,0.2);}
+  .file-row{transition:transform 0.15s ease;}
+  .file-row:hover{transform:translateX(3px);}
+  @keyframes progressAnim{from{width:0%}to{width:100%}}
+  .progress-bar{animation:progressAnim 1.5s ease forwards;}
+</style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- NAVBAR (copied from home.html) -->
+<nav class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-outline-variant">
+  <div class="flex items-center gap-8">
+    <span class="text-headline-md font-headline-md text-primary dark:text-primary tracking-tighter">Bairdo</span>
+    <div class="hidden lg:flex items-center gap-6">
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Image.html">Images</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="video.html">Video</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="audio.html">Audio</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Pdf.html">PDF</a>
+      <a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md" href="Zip.html">ZIP</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Qrcode.html">QR</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="code.html">Code</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="YouTube_Downloader.html">YouTube</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <button id="hamburger-btn" class="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-[5px] focus:outline-none" aria-label="Menu">
+      <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+      <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+      <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+    </button>
+    <div class="relative" id="account-menu-wrapper">
+      <button id="account-btn" class="w-10 h-10 rounded-full bg-primary-container border-2 border-primary flex items-center justify-center overflow-hidden focus:outline-none hover:brightness-110 transition-all" style="border-radius:9999px;min-width:40px;min-height:40px;">
+        <img id="account-photo" src="" alt="profile" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;display:none;"/>
+        <span id="account-initials" class="text-on-primary font-bold text-sm" style="display:none;"></span>
+        <span id="account-loading" class="material-symbols-outlined text-primary text-[18px]" style="animation:spin 1s linear infinite;">progress_activity</span>
+      </button>
+      <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-surface-container-high border border-outline-variant rounded-xl shadow-2xl overflow-hidden" style="z-index:9999;">
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-outline-variant">
+          <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-primary" style="border-radius:9999px;">
+            <img id="dropdown-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:9999px;"/>
+            <div id="dropdown-initials-circle" class="w-full h-full bg-primary-container flex items-center justify-center" style="display:flex;">
+              <span id="dropdown-initials" class="text-on-primary font-bold text-sm"></span>
+            </div>
+          </div>
+          <div class="min-w-0">
+            <p id="dropdown-name" class="text-on-surface font-bold text-sm truncate"></p>
+            <p id="dropdown-email" class="text-on-surface-variant text-xs truncate mt-0.5"></p>
+          </div>
+        </div>
+        <button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-3 text-error hover:bg-error/10 transition-colors text-sm font-bold">
+          <span class="material-symbols-outlined text-[18px]">logout</span> Log Out
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Drawer Overlay -->
+<div id="drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+<!-- Mobile Drawer -->
+<div id="mobile-drawer" class="fixed top-0 left-0 h-full w-72 bg-surface-container-low border-r border-outline-variant z-50 lg:hidden flex flex-col" style="transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">
+  <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant">
+    <span class="text-headline-md font-headline-md text-primary tracking-tighter">Bairdo</span>
+    <button id="drawer-close" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors">
+      <span class="material-symbols-outlined text-on-surface-variant text-[20px]">close</span>
+    </button>
+  </div>
+  <nav class="flex flex-col px-4 py-4 gap-1 flex-grow">
+    <a href="Image.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">image</span> Images</a>
+    <a href="video.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">movie</span> Video</a>
+    <a href="audio.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">music_note</span> Audio</a>
+    <a href="Pdf.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">picture_as_pdf</span> PDF</a>
+    <a href="Zip.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-surface-container font-bold font-body-md"><span class="material-symbols-outlined text-[20px]">folder_zip</span> ZIP</a>
+    <a href="Qrcode.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">qr_code</span> QR Code</a>
+    <a href="code.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">code</span> Code</a>
+    <a href="YouTube_Downloader.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">play_circle</span> YouTube</a>
+  </nav>
+  <div class="px-4 py-4 border-t border-outline-variant">
+    <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container">
+      <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-primary" style="border-radius:9999px;">
+        <img id="drawer-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:9999px;"/>
+        <div id="drawer-initials-circle" class="w-full h-full bg-primary-container flex items-center justify-center">
+          <span id="drawer-initials" class="text-on-primary font-bold text-xs"></span>
+        </div>
+      </div>
+      <div class="min-w-0 flex-grow">
+        <p id="drawer-name" class="text-on-surface font-bold text-sm truncate"></p>
+        <p id="drawer-email" class="text-on-surface-variant text-xs truncate"></p>
+      </div>
+    </div>
+    <button id="drawer-logout" class="mt-2 w-full flex items-center gap-3 px-4 py-3 rounded-lg text-error hover:bg-error/10 transition-colors text-sm font-bold">
+      <span class="material-symbols-outlined text-[18px]">logout</span> Log Out
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-xl space-y-16">
+
+  <!-- Hero -->
+  <header class="max-w-3xl">
+    <span class="font-label-sm text-label-sm text-primary uppercase tracking-[0.2em] mb-3 block">Archive Management</span>
+    <h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-4">Professional ZIP Suite</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant">Compress files into archives or extract existing ZIPs — processed entirely in your browser. Nothing leaves your device.</p>
+  </header>
+
+  <!-- Two Panels -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+
+    <!-- CREATE ZIP -->
+    <section class="lg:col-span-7">
+      <div class="bg-surface-container border border-outline-variant rounded-xl p-md wood-texture relative overflow-hidden">
+        <div class="flex justify-between items-start mb-6">
+          <div>
+            <h2 class="font-headline-md text-headline-md text-primary">Create ZIP Archive</h2>
+            <p class="font-label-sm text-label-sm text-outline uppercase tracking-widest mt-1">إنشاء أرشيف مضغوط</p>
+          </div>
+          <span class="material-symbols-outlined text-primary text-4xl opacity-40">folder_zip</span>
+        </div>
+
+        <!-- Drop Zone -->
+        <div id="create-dropzone"
+             class="border-2 border-dashed border-outline-variant rounded-xl p-xl flex flex-col items-center justify-center text-center space-y-4 cursor-pointer transition-all bg-surface-container-lowest/50 hover:border-primary/50"
+             onclick="document.getElementById('create-file-input').click()">
+          <span class="material-symbols-outlined text-5xl text-outline-variant transition-colors">cloud_upload</span>
+          <div class="space-y-1">
+            <p class="font-body-md text-body-md text-on-surface">Drag & drop files here</p>
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Any file type · No size limit</p>
+          </div>
+          <span class="mt-2 px-5 py-2 border border-outline-variant text-primary rounded-lg font-label-sm text-label-sm">Select Files</span>
+        </div>
+        <input type="file" id="create-file-input" multiple class="hidden"/>
+
+        <!-- File Queue -->
+        <div id="create-file-list" class="mt-6 space-y-2 hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-label-sm text-label-sm text-outline uppercase" id="queue-label">Queue (0 Files)</h3>
+            <button id="clear-all-btn" class="font-label-sm text-label-sm text-error hover:text-on-error transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px]">delete_sweep</span> Clear All
+            </button>
+          </div>
+          <div id="create-items-container" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- Archive Name -->
+        <div id="archive-name-row" class="mt-6 hidden">
+          <label class="font-label-sm text-label-sm text-outline uppercase block mb-2">Archive Name</label>
+          <div class="flex gap-2 items-center">
+            <input id="archive-name" type="text" value="archive" placeholder="archive"
+              class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2 text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary transition-colors"/>
+            <span class="text-on-surface-variant font-label-sm text-label-sm">.zip</span>
+          </div>
+        </div>
+
+        <!-- Compress Button -->
+        <button id="compress-btn" class="w-full mt-6 py-4 bg-primary text-on-primary font-bold rounded-lg flex items-center justify-center gap-2 amber-glow transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+          <span class="material-symbols-outlined" id="compress-icon">compress</span>
+          <span id="compress-label">Compress &amp; Download ZIP</span>
+        </button>
+        <div id="create-progress" class="mt-4 hidden">
+          <div class="w-full bg-surface-container-highest rounded-full h-1.5">
+            <div class="bg-primary h-1.5 rounded-full progress-bar"></div>
+          </div>
+          <p class="font-label-sm text-label-sm text-on-surface-variant mt-2 text-center">Compressing files…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXTRACT ZIP -->
+    <section class="lg:col-span-5">
+      <div class="bg-surface-container-high border border-outline-variant rounded-xl p-md wood-texture relative flex flex-col">
+        <div class="mb-6">
+          <h2 class="font-headline-md text-headline-md text-secondary">Extract ZIP Archive</h2>
+          <p class="font-label-sm text-label-sm text-outline uppercase tracking-widest mt-1">استخراج وفك الضغط</p>
+        </div>
+
+        <!-- ZIP Drop Zone -->
+        <div id="extract-dropzone"
+             class="border-2 border-dashed border-outline-variant rounded-xl p-lg flex flex-col items-center justify-center text-center space-y-3 mb-6 hover:border-secondary transition-colors cursor-pointer bg-background/40"
+             onclick="document.getElementById('extract-file-input').click()">
+          <span class="material-symbols-outlined text-4xl text-secondary" id="extract-icon">inventory_2</span>
+          <p class="font-body-md text-body-md text-on-surface">Drop a ZIP file here</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">Supports .zip archives</p>
+        </div>
+        <input type="file" id="extract-file-input" accept=".zip" class="hidden"/>
+
+        <!-- ZIP Info -->
+        <div id="zip-info-bar" class="hidden mb-4 px-4 py-3 bg-surface-container-lowest rounded-lg border border-outline-variant/40 flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary">folder_zip</span>
+          <div class="min-w-0 flex-1">
+            <p id="zip-filename" class="text-on-surface font-bold text-sm truncate"></p>
+            <p id="zip-filecount" class="text-on-surface-variant text-xs"></p>
+          </div>
+          <button id="clear-zip-btn" class="text-error hover:bg-error/10 p-1 rounded-full transition-colors">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <!-- Archive Content -->
+        <div class="flex-grow">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-label-sm text-label-sm text-outline uppercase">Archive Contents</h3>
+            <span id="extract-count-badge" class="hidden font-label-sm text-label-sm text-primary"></span>
+          </div>
+          <div id="extract-empty-state" class="bg-surface-container-lowest/50 p-4 rounded-lg border border-outline-variant/30 min-h-[120px] flex items-center justify-center">
+            <p class="font-label-sm text-label-sm text-outline text-center">Load a ZIP to see its contents</p>
+          </div>
+          <div id="extract-items-container" class="bg-surface-container-lowest/50 rounded-lg border border-outline-variant/30 overflow-y-auto max-h-72 hidden divide-y divide-outline-variant/20"></div>
+        </div>
+
+        <!-- Extract All -->
+        <button id="extract-all-btn" class="w-full mt-6 py-4 bg-secondary-container border border-secondary/30 text-on-secondary-container font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-secondary hover:text-on-secondary transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+          <span class="material-symbols-outlined">unarchive</span>
+          Extract &amp; Download All
+        </button>
+        <div id="extract-progress" class="mt-4 hidden">
+          <div class="w-full bg-surface-container-highest rounded-full h-1.5">
+            <div class="bg-secondary h-1.5 rounded-full progress-bar" style="animation-duration:0.8s;"></div>
+          </div>
+          <p class="font-label-sm text-label-sm text-on-surface-variant mt-2 text-center">Preparing download…</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Feature Cards -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+    <div class="p-6 bg-surface-container border border-outline-variant rounded-xl space-y-3">
+      <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">security</span>
+      <h4 class="font-headline-md text-[20px] text-on-surface">100% Local Processing</h4>
+      <p class="font-body-md text-body-md text-on-surface-variant">All compression and extraction happens in your browser using JSZip. Your files never leave your device.</p>
+    </div>
+    <div class="p-6 bg-surface-container border border-outline-variant rounded-xl space-y-3">
+      <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">speed</span>
+      <h4 class="font-headline-md text-[20px] text-on-surface">Instant Compression</h4>
+      <p class="font-body-md text-body-md text-on-surface-variant">DEFLATE compression bundling. Add any mix of file types and download in seconds.</p>
+    </div>
+    <div class="p-6 bg-surface-container border border-outline-variant rounded-xl space-y-3">
+      <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">download_for_offline</span>
+      <h4 class="font-headline-md text-[20px] text-on-surface">Individual Downloads</h4>
+      <p class="font-body-md text-body-md text-on-surface-variant">Download each extracted file separately on hover, or grab everything at once.</p>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-xl px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-md bg-surface-container border-t border-outline-variant">
+  <div class="flex flex-col gap-2">
+    <span class="text-body-lg font-headline-md text-primary">Bairdo</span>
+    <p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 Bairdo Tool Suite. All rights reserved.</p>
+  </div>
+  <div class="flex flex-wrap justify-center gap-8">
+    <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">About Us</a>
+    <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Privacy Policy</a>
+    <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Terms of Service</a>
+    <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Contact Support</a>
+  </div>
+  <div class="flex gap-4">
+    <div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+      <span class="material-symbols-outlined text-sm text-on-surface-variant">share</span>
+    </div>
+    <div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+      <span class="material-symbols-outlined text-sm text-on-surface-variant">public</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── Helpers
+function formatSize(bytes){if(bytes===0)return'0 B';const k=1024,s=['B','KB','MB','GB'];const i=Math.floor(Math.log(bytes)/Math.log(k));return parseFloat((bytes/Math.pow(k,i)).toFixed(1))+' '+s[i];}
+function getFileIcon(name){const ext=name.split('.').pop().toLowerCase();const m={pdf:'picture_as_pdf',jpg:'image',jpeg:'image',png:'image',gif:'image',webp:'image',svg:'image',mp4:'videocam',mov:'videocam',avi:'videocam',mkv:'videocam',mp3:'music_note',wav:'music_note',flac:'music_note',ogg:'music_note',html:'html',css:'css',js:'javascript',ts:'code',jsx:'code',tsx:'code',py:'code',json:'data_object',xml:'code',zip:'folder_zip',rar:'folder_zip',doc:'description',docx:'description',xls:'table_chart',xlsx:'table_chart',ppt:'present_to_all',pptx:'present_to_all',txt:'text_snippet'};return m[ext]||'insert_drive_file';}
+
+// ─── CREATE ZIP
+const createFileInput=document.getElementById('create-file-input');
+const createDropzone=document.getElementById('create-dropzone');
+const createItemsCont=document.getElementById('create-items-container');
+const createFileList=document.getElementById('create-file-list');
+const queueLabel=document.getElementById('queue-label');
+const compressBtn=document.getElementById('compress-btn');
+const archiveNameInput=document.getElementById('archive-name');
+const archiveNameRow=document.getElementById('archive-name-row');
+const createProgress=document.getElementById('create-progress');
+const clearAllBtn=document.getElementById('clear-all-btn');
+let createFiles=[];
+
+function renderCreateList(){
+  createItemsCont.innerHTML='';
+  createFiles.forEach((f,idx)=>{
+    const row=document.createElement('div');
+    row.className='file-row flex items-center justify-between p-3 bg-secondary-container/20 border-l-4 border-primary rounded-r-lg fade-in';
+    row.innerHTML=`<div class="flex items-center gap-3 min-w-0"><span class="material-symbols-outlined text-primary flex-shrink-0">${getFileIcon(f.name)}</span><div class="min-w-0"><p class="font-body-md text-body-md text-on-surface leading-tight truncate max-w-[240px]">${f.name}</p><p class="font-label-sm text-label-sm text-on-surface-variant">${formatSize(f.size)}</p></div></div><button data-idx="${idx}" class="remove-btn p-1.5 hover:bg-error-container/30 text-outline-variant hover:text-error transition-colors rounded flex-shrink-0"><span class="material-symbols-outlined text-[18px]">close</span></button>`;
+    createItemsCont.appendChild(row);
+  });
+  const total=createFiles.reduce((s,f)=>s+f.size,0);
+  queueLabel.textContent=`Queue (${createFiles.length} File${createFiles.length!==1?'s':''})${createFiles.length>0?' · '+formatSize(total):''}`;
+  const show=createFiles.length>0;
+  createFileList.classList.toggle('hidden',!show);
+  archiveNameRow.classList.toggle('hidden',!show);
+  compressBtn.disabled=!show;
+  createItemsCont.querySelectorAll('.remove-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{createFiles.splice(parseInt(e.currentTarget.dataset.idx),1);renderCreateList();});
+  });
+}
+
+function addFiles(files){Array.from(files).forEach(f=>{if(!createFiles.find(x=>x.name===f.name&&x.size===f.size))createFiles.push(f);});renderCreateList();}
+createFileInput.addEventListener('change',e=>addFiles(e.target.files));
+['dragenter','dragover'].forEach(ev=>createDropzone.addEventListener(ev,e=>{e.preventDefault();createDropzone.classList.add('drop-active');}));
+['dragleave','drop'].forEach(ev=>createDropzone.addEventListener(ev,e=>{e.preventDefault();createDropzone.classList.remove('drop-active');}));
+createDropzone.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+clearAllBtn.addEventListener('click',()=>{createFiles=[];renderCreateList();});
+
+compressBtn.addEventListener('click',async()=>{
+  if(!createFiles.length)return;
+  compressBtn.disabled=true;
+  document.getElementById('compress-icon').classList.add('spin');
+  document.getElementById('compress-label').textContent='Compressing…';
+  createProgress.classList.remove('hidden');
+  try{
+    const zip=new JSZip();
+    createFiles.forEach(f=>zip.file(f.name,f));
+    const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+    saveAs(blob,(archiveNameInput.value.trim()||'archive')+'.zip');
+  }catch(err){console.error(err);}
+  setTimeout(()=>{compressBtn.disabled=false;document.getElementById('compress-icon').classList.remove('spin');document.getElementById('compress-label').textContent='Compress & Download ZIP';createProgress.classList.add('hidden');},1600);
+});
+
+// ─── EXTRACT ZIP
+const extractFileInput=document.getElementById('extract-file-input');
+const extractDropzone=document.getElementById('extract-dropzone');
+const extractItemsCont=document.getElementById('extract-items-container');
+const extractEmptyState=document.getElementById('extract-empty-state');
+const extractAllBtn=document.getElementById('extract-all-btn');
+const extractProgress=document.getElementById('extract-progress');
+const zipInfoBar=document.getElementById('zip-info-bar');
+const zipFilenameEl=document.getElementById('zip-filename');
+const zipFilecountEl=document.getElementById('zip-filecount');
+const extractCountBadge=document.getElementById('extract-count-badge');
+const clearZipBtn=document.getElementById('clear-zip-btn');
+let loadedZip=null,loadedEntries=[],loadedZipBlob=null;
+
+async function loadZipFile(file){
+  document.getElementById('extract-icon').classList.add('spin');
+  try{
+    loadedZipBlob=file;
+    loadedZip=await JSZip.loadAsync(file);
+    loadedEntries=[];
+    loadedZip.forEach((path,entry)=>{if(!entry.dir)loadedEntries.push({path,entry});});
+    zipFilenameEl.textContent=file.name;
+    zipFilecountEl.textContent=`${loadedEntries.length} file${loadedEntries.length!==1?'s':''}`;
+    zipInfoBar.classList.remove('hidden');
+    extractCountBadge.textContent=`${loadedEntries.length} files`;
+    extractCountBadge.classList.remove('hidden');
+    renderExtractList();
+    extractAllBtn.disabled=false;
+  }catch(err){alert('Could not read this ZIP file.');console.error(err);}
+  document.getElementById('extract-icon').classList.remove('spin');
+}
+
+function renderExtractList(){
+  extractEmptyState.classList.add('hidden');
+  extractItemsCont.classList.remove('hidden');
+  extractItemsCont.innerHTML='';
+  loadedEntries.forEach(({path,entry},idx)=>{
+    const shortName=path.split('/').pop()||path;
+    const folder=path.includes('/')?path.split('/').slice(0,-1).join('/'):'';
+    const row=document.createElement('div');
+    row.className='flex items-center justify-between px-4 py-2.5 group/extract fade-in';
+    row.innerHTML=`<div class="flex items-center gap-3 min-w-0"><span class="material-symbols-outlined text-on-surface-variant text-[20px] flex-shrink-0">${getFileIcon(shortName)}</span><div class="min-w-0"><span class="font-body-md text-body-md text-on-surface truncate block max-w-[190px]">${shortName}</span>${folder?`<span class="font-label-sm text-label-sm text-outline truncate block">${folder}/</span>`:''}</div></div><button data-idx="${idx}" class="dl-single text-secondary hover:bg-secondary/10 p-1.5 rounded-full transition-colors opacity-0 group-hover/extract:opacity-100 flex-shrink-0" title="Download ${shortName}"><span class="material-symbols-outlined text-[18px]">download</span></button>`;
+    extractItemsCont.appendChild(row);
+  });
+  extractItemsCont.querySelectorAll('.dl-single').forEach(btn=>{
+    btn.addEventListener('click',async e=>{
+      const{path,entry}=loadedEntries[parseInt(e.currentTarget.dataset.idx)];
+      const blob=await entry.async('blob');
+      saveAs(blob,path.split('/').pop()||path);
+    });
+  });
+}
+
+function clearZip(){loadedZip=null;loadedEntries=[];loadedZipBlob=null;extractItemsCont.innerHTML='';extractItemsCont.classList.add('hidden');extractEmptyState.classList.remove('hidden');zipInfoBar.classList.add('hidden');extractCountBadge.classList.add('hidden');extractAllBtn.disabled=true;extractFileInput.value='';}
+
+extractFileInput.addEventListener('change',e=>{if(e.target.files[0])loadZipFile(e.target.files[0]);});
+['dragenter','dragover'].forEach(ev=>extractDropzone.addEventListener(ev,e=>{e.preventDefault();extractDropzone.classList.add('drop-active');}));
+['dragleave','drop'].forEach(ev=>extractDropzone.addEventListener(ev,e=>{e.preventDefault();extractDropzone.classList.remove('drop-active');}));
+extractDropzone.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)loadZipFile(f);});
+clearZipBtn.addEventListener('click',clearZip);
+
+extractAllBtn.addEventListener('click',async()=>{
+  if(!loadedZipBlob)return;
+  extractAllBtn.disabled=true;
+  extractProgress.classList.remove('hidden');
+  saveAs(loadedZipBlob,zipFilenameEl.textContent||'archive.zip');
+  setTimeout(()=>{extractAllBtn.disabled=false;extractProgress.classList.add('hidden');},800);
+});
+
+// ─── NAVBAR
+const hamburgerBtn=document.getElementById('hamburger-btn');
+const drawer=document.getElementById('mobile-drawer');
+const overlay=document.getElementById('drawer-overlay');
+function openDrawer(){drawer.style.transform='translateX(0)';overlay.classList.remove('hidden');document.body.style.overflow='hidden';}
+function closeDrawer(){drawer.style.transform='translateX(-100%)';overlay.classList.add('hidden');document.body.style.overflow='';}
+hamburgerBtn.addEventListener('click',openDrawer);
+document.getElementById('drawer-close').addEventListener('click',closeDrawer);
+overlay.addEventListener('click',closeDrawer);
+document.getElementById('account-btn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('account-dropdown').classList.toggle('hidden');});
+document.addEventListener('click',e=>{if(!document.getElementById('account-menu-wrapper').contains(e.target))document.getElementById('account-dropdown').classList.add('hidden');});
+window.addEventListener('scroll',()=>{document.querySelector('nav').classList.toggle('shadow-xl',window.scrollY>20);});
+</script>
+
+<!-- Firebase Auth -->
+<script type="module">
+  import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  const firebaseConfig={apiKey:"AIzaSyD3CWk3-mBly4eJDIzUdA_FOXYX2-L9Yd4",authDomain:"bairdo-e23a3.firebaseapp.com",projectId:"bairdo-e23a3",storageBucket:"bairdo-e23a3.firebasestorage.app",messagingSenderId:"8126805307",appId:"1:8126805307:web:dbf71743bd29a3b73d731e"};
+  const app=initializeApp(firebaseConfig);
+  const auth=getAuth(app);
+  onAuthStateChanged(auth,user=>{
+    document.getElementById('account-loading').style.display='none';
+    if(!user){window.location.href="index.html";return;}
+    const name=user.displayName||user.email?.split('@')[0]||"User";
+    const email=user.email||"Anonymous";
+    const photo=user.photoURL;
+    const initials=name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('dropdown-name').textContent=name;
+    document.getElementById('dropdown-email').textContent=email;
+    document.getElementById('dropdown-initials').textContent=initials;
+    document.getElementById('drawer-name').textContent=name;
+    document.getElementById('drawer-email').textContent=email;
+    document.getElementById('drawer-initials').textContent=initials;
+    if(photo){
+      ['account-photo','dropdown-photo','drawer-photo'].forEach(id=>{const img=document.getElementById(id);img.src=photo;img.style.display='block';});
+      document.getElementById('dropdown-initials-circle').style.display='none';
+      document.getElementById('drawer-initials-circle').style.display='none';
+    }else{document.getElementById('account-initials').style.display='block';}
+  });
+  const doSignOut=async()=>{await signOut(auth);window.location.href="index.html";};
+  document.getElementById('logout-btn').addEventListener('click',doSignOut);
+  document.getElementById('drawer-logout').addEventListener('click',doSignOut);
+</script>
+</body>
+</html>
