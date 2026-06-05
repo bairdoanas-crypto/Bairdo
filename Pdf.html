@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bairdo | Professional PDF Suite</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- PDF.js for extraction -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- jsPDF for creation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- JSZip for zip download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "surface-bright": "#393939",
+        "primary-container": "#d4a373",
+        "on-primary-fixed": "#2c1600",
+        "inverse-on-surface": "#313030",
+        "on-primary-container": "#5b3912",
+        "on-error": "#690005",
+        "primary-fixed-dim": "#f0bd8b",
+        "surface-container": "#20201f",
+        "surface-container-high": "#2a2a2a",
+        "on-tertiary": "#4a2806",
+        "on-tertiary-fixed": "#2e1500",
+        "error-container": "#93000a",
+        "on-secondary": "#3f2c20",
+        "secondary-container": "#574335",
+        "surface-container-highest": "#353535",
+        "error": "#ffb4ab",
+        "on-surface": "#e5e2e1",
+        "tertiary-fixed": "#ffdcc2",
+        "tertiary": "#f5bc8f",
+        "on-secondary-fixed": "#28180d",
+        "background": "#131313",
+        "surface-tint": "#f0bd8b",
+        "inverse-surface": "#e5e2e1",
+        "surface-container-lowest": "#0e0e0e",
+        "on-background": "#e5e2e1",
+        "on-primary-fixed-variant": "#623f18",
+        "primary-fixed": "#ffdcbd",
+        "primary": "#f2be8c",
+        "outline-variant": "#50453b",
+        "on-secondary-fixed-variant": "#574335",
+        "on-secondary-container": "#ccb09f",
+        "outline": "#9c8e82",
+        "on-tertiary-fixed-variant": "#653e1b",
+        "surface-dim": "#131313",
+        "secondary-fixed-dim": "#dec1af",
+        "secondary-fixed": "#fbddca",
+        "on-surface-variant": "#d4c4b7",
+        "on-tertiary-container": "#5d3715",
+        "tertiary-fixed-dim": "#f4bb8e",
+        "surface-variant": "#353535",
+        "secondary": "#dec1af",
+        "surface": "#131313",
+        "on-error-container": "#ffdad6",
+        "inverse-primary": "#7d562d",
+        "tertiary-container": "#d7a176",
+        "surface-container-low": "#1c1b1b",
+        "on-primary": "#482904"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"
+      },
+      "spacing": {
+        "margin-mobile": "16px", "xs": "0.5rem", "gutter": "24px",
+        "md": "1.5rem", "xl": "4rem", "sm": "1rem", "base": "4px",
+        "lg": "2.5rem", "margin-desktop": "48px"
+      },
+      "fontFamily": {
+        "body-md": ["Geist"], "headline-md": ["Geist"],
+        "display-lg-mobile": ["Geist"], "display-lg": ["Geist"],
+        "label-sm": ["JetBrains Mono"], "body-lg": ["Geist"]
+      },
+      "fontSize": {
+        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+      }
+    },
+  },
+}
+</script>
+<style>
+  body { background-color: #131313; color: #e5e2e1; font-family: 'Geist', sans-serif; }
+  .wood-texture {
+    background-image: linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+    background-size: 4px 100%;
+  }
+  .surface-oak { background-color: #2B1E16; border: 1px solid #3D2B1F; position: relative; }
+  .surface-oak::after {
+    content: ""; position: absolute; top: 0; left: 0; right: 0;
+    height: 1px; background: linear-gradient(90deg, transparent, #3D2B1F, transparent);
+  }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .inner-glow-primary:hover { box-shadow: 0 0 20px rgba(212, 163, 115, 0.1); }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: #131313; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #3D2B1F; border-radius: 2px; }
+  #upload-zone.drag-over { border-color: #f2be8c; background-color: rgba(242,190,140,0.05); }
+  .page-thumb { transition: all 0.2s; }
+  .page-thumb:hover { transform: scale(1.02); }
+  .toolbar-btn { transition: all 0.15s; }
+  .toolbar-btn.active { background-color: #574335; color: #f2be8c; }
+</style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container custom-scrollbar">
+
+<!-- ===================== NAVBAR (from home.html) ===================== -->
+<nav class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-outline-variant">
+  <div class="flex items-center gap-8">
+    <span class="text-headline-md font-headline-md text-primary dark:text-primary tracking-tighter">Bairdo</span>
+    <!-- Desktop Links -->
+    <div class="hidden lg:flex items-center gap-6">
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Image.html">Images</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="video.html">Video</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="audio.html">Audio</a>
+      <div class="relative pb-1">
+        <a class="text-primary font-bold font-body-md text-body-md" href="Pdf.html">PDF</a>
+        <div class="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-primary"></div>
+      </div>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Zip.html">ZIP</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="Qrcode.html">QR</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="code.html">Code</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="YouTube_Downloader.html">YouTube</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <!-- Hamburger Button (mobile only) -->
+    <button id="hamburger-btn" class="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-[5px] focus:outline-none" aria-label="Menu">
+      <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+      <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+      <span class="ham-line block w-6 h-[2px] bg-on-surface rounded-full transition-all duration-300"></span>
+    </button>
+    <!-- Account Avatar -->
+    <div class="relative" id="account-menu-wrapper">
+      <button id="account-btn" class="w-10 h-10 rounded-full bg-primary-container border-2 border-primary flex items-center justify-center overflow-hidden focus:outline-none hover:brightness-110 transition-all" style="border-radius:9999px;min-width:40px;min-height:40px;">
+        <img id="account-photo" src="" alt="profile" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;display:none;"/>
+        <span id="account-initials" class="text-on-primary font-bold text-sm" style="display:none;"></span>
+        <span id="account-loading" class="material-symbols-outlined text-primary text-[18px]" style="animation:spin 1s linear infinite;">progress_activity</span>
+      </button>
+      <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-surface-container-high border border-outline-variant rounded-xl shadow-2xl overflow-hidden" style="z-index:9999;">
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-outline-variant">
+          <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-primary" style="border-radius:9999px;">
+            <img id="dropdown-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:9999px;"/>
+            <div id="dropdown-initials-circle" class="w-full h-full bg-primary-container flex items-center justify-center" style="display:flex;">
+              <span id="dropdown-initials" class="text-on-primary font-bold text-sm"></span>
+            </div>
+          </div>
+          <div class="min-w-0">
+            <p id="dropdown-name" class="text-on-surface font-bold text-sm truncate"></p>
+            <p id="dropdown-email" class="text-on-surface-variant text-xs truncate mt-0.5"></p>
+          </div>
+        </div>
+        <button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-3 text-error hover:bg-error/10 transition-colors text-sm font-bold">
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+          Log Out
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Drawer Overlay -->
+<div id="drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden" style="transition:opacity 0.3s;"></div>
+
+<!-- Mobile Drawer -->
+<div id="mobile-drawer" class="fixed top-0 left-0 h-full w-72 bg-surface-container-low border-r border-outline-variant z-50 lg:hidden flex flex-col" style="transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">
+  <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant">
+    <span class="text-headline-md font-headline-md text-primary tracking-tighter">Bairdo</span>
+    <button id="drawer-close" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors">
+      <span class="material-symbols-outlined text-on-surface-variant text-[20px]">close</span>
+    </button>
+  </div>
+  <nav class="flex flex-col px-4 py-4 gap-1 flex-grow">
+    <a href="Image.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">image</span> Images</a>
+    <a href="video.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">movie</span> Video</a>
+    <a href="audio.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">music_note</span> Audio</a>
+    <a href="Pdf.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-surface-container font-bold font-body-md"><span class="material-symbols-outlined text-[20px]">picture_as_pdf</span> PDF</a>
+    <a href="Zip.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">folder_zip</span> ZIP</a>
+    <a href="Qrcode.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">qr_code</span> QR Code</a>
+    <a href="code.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">code</span> Code</a>
+    <a href="YouTube_Downloader.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors font-body-md"><span class="material-symbols-outlined text-[20px]">play_circle</span> YouTube</a>
+  </nav>
+  <div class="px-4 py-4 border-t border-outline-variant">
+    <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container">
+      <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-primary" style="border-radius:9999px;">
+        <img id="drawer-photo" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:9999px;"/>
+        <div id="drawer-initials-circle" class="w-full h-full bg-primary-container flex items-center justify-center">
+          <span id="drawer-initials" class="text-on-primary font-bold text-xs"></span>
+        </div>
+      </div>
+      <div class="min-w-0 flex-grow">
+        <p id="drawer-name" class="text-on-surface font-bold text-sm truncate"></p>
+        <p id="drawer-email" class="text-on-surface-variant text-xs truncate"></p>
+      </div>
+    </div>
+    <button id="drawer-logout" class="mt-2 w-full flex items-center gap-3 px-4 py-3 rounded-lg text-error hover:bg-error/10 transition-colors text-sm font-bold">
+      <span class="material-symbols-outlined text-[18px]">logout</span>
+      Log Out
+    </button>
+  </div>
+</div>
+
+<!-- ===================== MAIN LAYOUT ===================== -->
+<div class="flex min-h-[calc(100vh-72px)]">
+
+  <!-- SideNavBar -->
+  <aside class="hidden lg:flex flex-col h-[calc(100vh-72px)] sticky top-[72px] w-64 bg-surface-container-lowest border-r border-outline-variant py-md px-xs">
+    <div class="flex flex-col gap-xs mb-xl">
+      <div class="flex items-center gap-sm px-sm py-xs bg-secondary-container text-on-secondary-container border-l-4 border-primary">
+        <span class="material-symbols-outlined">picture_as_pdf</span>
+        <span class="font-body-md text-body-md">PDF Suite</span>
+      </div>
+      <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg" href="Image.html">
+        <span class="material-symbols-outlined">image</span><span class="font-body-md text-body-md">Images</span>
+      </a>
+      <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg" href="video.html">
+        <span class="material-symbols-outlined">movie</span><span class="font-body-md text-body-md">Video</span>
+      </a>
+      <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg" href="audio.html">
+        <span class="material-symbols-outlined">mic</span><span class="font-body-md text-body-md">Audio</span>
+      </a>
+    </div>
+    <div class="mt-auto pt-xl border-t border-outline-variant">
+      <div class="bg-primary-container/10 p-sm rounded-xl mb-md">
+        <p class="font-label-sm text-label-sm text-primary mb-xs">PRO FEATURES</p>
+        <p class="font-body-md text-body-md text-on-surface mb-sm">Batch OCR &amp; Compression</p>
+        <button class="w-full bg-primary text-on-primary py-xs rounded-lg font-body-md text-body-md shadow-lg">Upgrade</button>
+      </div>
+      <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-lg" href="#">
+        <span class="material-symbols-outlined">settings</span><span class="font-body-md text-body-md">Settings</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 w-full p-margin-mobile md:p-gutter xl:p-xl overflow-hidden bg-background">
+    <header class="mb-xl">
+      <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-xs">Professional PDF Suite</h1>
+      <p class="text-on-surface-variant font-body-lg text-body-lg max-w-2xl">Architect-level tools for generating, parsing, and extracting high-fidelity documentation.</p>
+    </header>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-gutter items-start">
+
+      <!-- ===== SECTION 1: PDF CREATION ===== -->
+      <section class="flex flex-col gap-md">
+        <div class="flex items-center gap-sm mb-xs">
+          <span class="bg-primary-container p-2 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary-container">add_notes</span>
+          </span>
+          <h2 class="font-headline-md text-headline-md text-on-surface">PDF Creation <span class="text-on-surface-variant opacity-50 ml-2 font-normal">(إنشاء PDF)</span></h2>
+        </div>
+        <div class="surface-oak wood-texture p-md rounded-xl min-h-[500px] flex flex-col shadow-2xl">
+
+          <!-- PDF Title -->
+          <input id="pdf-title" type="text" placeholder="Document title (optional)" class="bg-transparent border-b border-outline-variant mb-md text-on-surface font-headline-md text-headline-md placeholder-on-surface-variant/40 focus:outline-none focus:border-primary pb-2 transition-colors"/>
+
+          <!-- Upload Images -->
+          <div class="mb-md">
+            <label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-sm">Images</label>
+            <div class="border-2 border-dashed border-outline-variant rounded-xl p-md flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary transition-all group" onclick="document.getElementById('create-img-input').click()">
+              <span class="material-symbols-outlined text-[40px] text-outline group-hover:text-primary mb-xs transition-colors">add_photo_alternate</span>
+              <p class="font-body-md text-body-md text-on-surface">Add Images</p>
+              <p class="font-label-sm text-label-sm text-on-surface-variant">PNG, JPG, WEBP — each on its own page</p>
+              <input type="file" id="create-img-input" accept="image/*" multiple class="hidden"/>
+            </div>
+            <div id="attached-images" class="mt-sm flex flex-wrap gap-sm hidden"></div>
+          </div>
+
+          <!-- Upload Text File -->
+          <div class="mb-xl">
+            <label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-sm">Text File <span class="normal-case opacity-60">(optional)</span></label>
+            <div class="border-2 border-dashed border-outline-variant rounded-xl p-md flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary transition-all group" onclick="document.getElementById('create-txt-input').click()">
+              <span class="material-symbols-outlined text-[40px] text-outline group-hover:text-primary mb-xs transition-colors">description</span>
+              <p class="font-body-md text-body-md text-on-surface">Upload .txt file</p>
+              <p class="font-label-sm text-label-sm text-on-surface-variant">Content will be added as text pages</p>
+              <input type="file" id="create-txt-input" accept=".txt,text/plain" class="hidden"/>
+            </div>
+            <div id="txt-file-info" class="hidden mt-sm flex items-center gap-sm bg-surface-container-highest border border-outline-variant px-sm py-xs rounded-lg">
+              <span class="material-symbols-outlined text-primary text-[18px]">description</span>
+              <span id="txt-file-name" class="font-label-sm text-label-sm text-on-surface flex-1 truncate"></span>
+              <button onclick="removeTxtFile()" class="text-error hover:text-on-error transition-colors"><span class="material-symbols-outlined text-[16px]">close</span></button>
+            </div>
+          </div>
+
+          <!-- Generate Button -->
+          <button id="generate-pdf-btn" onclick="generatePDF()" class="mt-auto w-full bg-primary-container text-on-primary-container py-md rounded-lg font-headline-md text-headline-md flex items-center justify-center gap-md shadow-xl hover:brightness-110 active:scale-[0.98] transition-all">
+            <span class="material-symbols-outlined">picture_as_pdf</span>
+            Generate &amp; Download PDF
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== SECTION 2: PDF EXTRACTION ===== -->
+      <section class="flex flex-col gap-md">
+        <div class="flex items-center gap-sm mb-xs">
+          <span class="bg-secondary-container p-2 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-secondary-container">filter_list</span>
+          </span>
+          <h2 class="font-headline-md text-headline-md text-on-surface">Extraction &amp; Parser <span class="text-on-surface-variant opacity-50 ml-2 font-normal">(استخراج وتحميل)</span></h2>
+        </div>
+        <div class="surface-oak wood-texture p-md rounded-xl min-h-[500px] flex flex-col shadow-2xl overflow-hidden">
+
+          <!-- Upload Zone -->
+          <div id="upload-zone" class="border-2 border-dashed border-outline-variant rounded-xl p-xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary transition-all group mb-md" onclick="document.getElementById('pdf-upload-input').click()">
+            <span class="material-symbols-outlined text-[64px] text-outline group-hover:text-primary mb-sm transition-colors">cloud_upload</span>
+            <h3 class="font-body-lg text-body-lg text-on-surface mb-xs">Upload existing PDF</h3>
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Drag &amp; drop or click to browse (Max 50MB)</p>
+            <input type="file" id="pdf-upload-input" accept="application/pdf" class="hidden"/>
+          </div>
+
+          <!-- Loading indicator -->
+          <div id="extraction-loading" class="hidden flex flex-col items-center justify-center py-xl gap-md">
+            <span class="material-symbols-outlined text-primary text-[48px]" style="animation:spin 1s linear infinite;">progress_activity</span>
+            <p class="text-on-surface-variant font-label-sm text-label-sm" id="loading-msg">Processing PDF...</p>
+          </div>
+
+          <!-- Extraction Workspace -->
+          <div id="extraction-workspace" class="flex-1 flex flex-col overflow-hidden hidden">
+            <!-- Stats bar -->
+            <div class="flex justify-between items-center mb-md flex-wrap gap-2">
+              <div class="flex gap-sm flex-wrap">
+                <span id="stat-pages" class="font-label-sm text-label-sm text-primary uppercase bg-primary/10 px-sm py-xs rounded-full">0 Pages</span>
+                <span id="stat-images" class="font-label-sm text-label-sm text-tertiary uppercase bg-tertiary/10 px-sm py-xs rounded-full hidden">0 Images</span>
+              </div>
+              <button id="download-all-btn" class="flex items-center gap-xs bg-surface-container-highest text-on-surface-variant border border-outline-variant px-sm py-xs rounded hover:text-primary hover:border-primary transition-colors">
+                <span class="material-symbols-outlined text-[18px]">folder_zip</span>
+                <span class="font-label-sm text-label-sm">Download All (ZIP)</span>
+              </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-1 mb-md border-b border-outline-variant">
+              <button class="tab-btn px-sm py-xs font-label-sm text-label-sm text-primary border-b-2 border-primary -mb-[1px] transition-colors" data-tab="pages">Pages (PNG)</button>
+              <button class="tab-btn px-sm py-xs font-label-sm text-label-sm text-on-surface-variant hover:text-primary border-b-2 border-transparent -mb-[1px] transition-colors" data-tab="images">Images</button>
+            </div>
+
+            <!-- Pages tab -->
+            <div id="tab-pages" class="tab-content grid grid-cols-2 sm:grid-cols-3 gap-sm overflow-y-auto custom-scrollbar pr-xs" style="max-height:400px;"></div>
+
+            <!-- Images tab -->
+            <div id="tab-images" class="tab-content hidden grid grid-cols-2 sm:grid-cols-3 gap-sm overflow-y-auto custom-scrollbar pr-xs" style="max-height:400px;">
+              <p id="no-images-msg" class="col-span-3 text-on-surface-variant font-label-sm text-label-sm text-center py-xl">No embedded images found in this PDF.</p>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div id="extraction-empty" class="flex-1 flex flex-col items-center justify-center text-center py-lg gap-sm opacity-40">
+            <span class="material-symbols-outlined text-[48px] text-on-surface-variant">picture_as_pdf</span>
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Upload a PDF to extract content</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="w-full py-xl px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-md bg-surface-container border-t border-outline-variant">
+  <div class="flex flex-col gap-2">
+    <span class="text-body-lg font-headline-md text-primary">Bairdo</span>
+    <p class="text-label-sm font-label-sm text-on-surface-variant">© 2024 Bairdo Tool Suite. All rights reserved.</p>
+  </div>
+  <div class="flex flex-wrap justify-center gap-8">
+    <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">About Us</a>
+    <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Privacy Policy</a>
+    <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Terms of Service</a>
+    <a class="text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" href="#">Contact Support</a>
+  </div>
+  <div class="flex gap-4">
+    <div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+      <span class="material-symbols-outlined text-sm text-on-surface-variant">share</span>
+    </div>
+    <div class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+      <span class="material-symbols-outlined text-sm text-on-surface-variant">public</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script>
+// ---- PDF.js worker ----
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ---- State ----
+let extractedText = '';
+let pageCanvases = [];
+let extractedImages = [];
+let attachedImages = [];
+let textFileContent = '';
+
+// ---- PDF CREATION: File Inputs ----
+document.getElementById('create-img-input').addEventListener('change', function(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      attachedImages.push({ name: file.name, dataUrl: ev.target.result });
+      renderAttachedImages();
+    };
+    reader.readAsDataURL(file);
+  });
+  this.value = '';
+});
+
+document.getElementById('create-txt-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    textFileContent = ev.target.result;
+    document.getElementById('txt-file-name').textContent = file.name;
+    document.getElementById('txt-file-info').classList.remove('hidden');
+  };
+  reader.readAsText(file);
+  this.value = '';
+});
+
+function removeTxtFile() {
+  textFileContent = '';
+  document.getElementById('txt-file-info').classList.add('hidden');
+  document.getElementById('txt-file-name').textContent = '';
+}
+
+function renderAttachedImages() {
+  const cont = document.getElementById('attached-images');
+  if (attachedImages.length === 0) { cont.classList.add('hidden'); return; }
+  cont.classList.remove('hidden');
+  cont.innerHTML = attachedImages.map((img, i) => `
+    <div class="relative group page-thumb">
+      <img src="${img.dataUrl}" alt="${img.name}" class="w-16 h-20 object-cover rounded border border-outline-variant"/>
+      <button onclick="removeAttachedImage(${i})" class="absolute -top-2 -right-2 bg-error text-on-error w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs">✕</button>
+      <p class="text-[9px] text-on-surface-variant mt-1 truncate w-16">${img.name}</p>
+    </div>
+  `).join('');
+}
+
+function removeAttachedImage(i) {
+  attachedImages.splice(i, 1);
+  renderAttachedImages();
+}
+
+// ---- PDF GENERATION ----
+async function generatePDF() {
+  if (attachedImages.length === 0 && !textFileContent.trim()) {
+    alert('Please upload at least one image or a text file.');
+    return;
+  }
+
+  const btn = document.getElementById('generate-pdf-btn');
+  btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite;">progress_activity</span> Generating...';
+  btn.disabled = true;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    const contentW = pageW - margin * 2;
+    let firstPage = true;
+
+    const title = document.getElementById('pdf-title').value.trim();
+
+    // Text file content first (if any)
+    if (textFileContent.trim()) {
+      let y = margin;
+      if (title) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(242, 190, 140);
+        doc.text(title, margin, y);
+        y += 12;
+        doc.setDrawColor(80, 69, 59);
+        doc.line(margin, y, pageW - margin, y);
+        y += 8;
+      }
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(229, 226, 225);
+      const lines = doc.splitTextToSize(textFileContent, contentW);
+      lines.forEach(line => {
+        if (y + 6 > pageH - margin) { doc.addPage(); y = margin; }
+        doc.text(line, margin, y);
+        y += 6;
+      });
+      firstPage = false;
+    }
+
+    // Images — each on its own page
+    for (const imgObj of attachedImages) {
+      if (!firstPage) doc.addPage();
+      firstPage = false;
+      try {
+        const imgProps = doc.getImageProperties(imgObj.dataUrl);
+        const maxW = contentW;
+        const maxH = pageH - margin * 2;
+        const ratio = Math.min(maxW / imgProps.width, maxH / imgProps.height);
+        const w = imgProps.width * ratio;
+        const h = imgProps.height * ratio;
+        const x = margin + (contentW - w) / 2;
+        const ext = imgObj.name.split('.').pop().toUpperCase().replace('JPG', 'JPEG') || 'JPEG';
+        doc.addImage(imgObj.dataUrl, ext, x, margin + (maxH - h) / 2, w, h);
+      } catch(e) { /* skip broken image */ }
+    }
+
+    const filename = (title || 'document').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
+    doc.save(filename);
+  } catch(err) {
+    alert('Error generating PDF: ' + err.message);
+    console.error(err);
+  }
+
+  btn.innerHTML = '<span class="material-symbols-outlined">picture_as_pdf</span> Generate &amp; Download PDF';
+  btn.disabled = false;
+}
+
+// ---- PDF EXTRACTION ----
+const uploadInput = document.getElementById('pdf-upload-input');
+const uploadZone = document.getElementById('upload-zone');
+
+uploadZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadZone.classList.add('drag-over');
+});
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') processPDF(file);
+});
+uploadInput.addEventListener('change', (e) => {
+  if (e.target.files[0]) processPDF(e.target.files[0]);
+});
+
+async function processPDF(file) {
+  if (file.size > 50 * 1024 * 1024) { alert('File too large. Max 50MB.'); return; }
+
+  // Show loading
+  uploadZone.classList.add('hidden');
+  document.getElementById('extraction-empty').classList.add('hidden');
+  document.getElementById('extraction-workspace').classList.add('hidden');
+  const loading = document.getElementById('extraction-loading');
+  loading.classList.remove('hidden');
+
+  pageCanvases = [];
+  extractedText = '';
+  extractedImages = [];
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const numPages = pdf.numPages;
+
+    document.getElementById('loading-msg').textContent = `Processing ${numPages} pages...`;
+    document.getElementById('stat-pages').textContent = numPages + ' Page' + (numPages > 1 ? 's' : '');
+
+    const pagesGrid = document.getElementById('tab-pages');
+    pagesGrid.innerHTML = '';
+
+    for (let i = 1; i <= numPages; i++) {
+      document.getElementById('loading-msg').textContent = `Rendering page ${i} of ${numPages}...`;
+      const page = await pdf.getPage(i);
+      const scale = 1.5;
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const dataUrl = canvas.toDataURL('image/png');
+      pageCanvases.push({ dataUrl, page: i });
+
+      // Render page card
+      const card = document.createElement('div');
+      card.className = 'bg-surface-container-low border border-outline-variant p-2 rounded-lg group page-thumb';
+      card.innerHTML = `
+        <div class="aspect-[3/4] bg-surface-container-highest rounded mb-2 overflow-hidden relative">
+          <img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" src="${dataUrl}"/>
+          <div class="absolute top-2 left-2 bg-background/80 px-1.5 py-0.5 rounded text-[10px] font-label-sm">PAGE ${i}</div>
+        </div>
+        <button onclick="downloadPage(${i - 1})" class="w-full bg-outline-variant/30 hover:bg-primary-container hover:text-on-primary-container text-on-surface-variant text-[10px] font-bold py-1.5 rounded transition-all flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-[14px]">download</span> PNG
+        </button>`;
+      pagesGrid.appendChild(card);
+    }
+
+    // Done
+    loading.classList.add('hidden');
+    document.getElementById('extraction-workspace').classList.remove('hidden');
+
+    // Update download all button
+    document.getElementById('download-all-btn').onclick = downloadAll;
+
+    // Setup tabs
+    setupTabs();
+
+  } catch(err) {
+    loading.classList.add('hidden');
+    uploadZone.classList.remove('hidden');
+    alert('Error processing PDF: ' + err.message);
+    console.error(err);
+  }
+}
+
+function downloadPage(idx) {
+  const { dataUrl, page } = pageCanvases[idx];
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `page_${page}.png`;
+  a.click();
+}
+
+function downloadText(ext) {
+  const blob = new Blob([extractedText], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'extracted_text.' + ext;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function copyText() {
+  navigator.clipboard.writeText(extractedText).then(() => {
+    const btn = event.target.closest('button');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span> Copied!';
+    setTimeout(() => btn.innerHTML = orig, 2000);
+  });
+}
+
+async function downloadAll() {
+  const btn = document.getElementById('download-all-btn');
+  btn.innerHTML = '<span class="material-symbols-outlined text-[18px]" style="animation:spin 1s linear infinite;">progress_activity</span><span class="font-label-sm text-label-sm">Packing ZIP...</span>';
+  btn.disabled = true;
+
+  try {
+    const zip = new JSZip();
+    const pages = zip.folder('pages');
+    for (const { dataUrl, page } of pageCanvases) {
+      const base64 = dataUrl.split(',')[1];
+      pages.file(`page_${page}.png`, base64, { base64: true });
+    }
+    const content = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'pdf_extract.zip';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) {
+    alert('ZIP error: ' + e.message);
+  }
+
+  btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">folder_zip</span><span class="font-label-sm text-label-sm">Download All (ZIP)</span>';
+  btn.disabled = false;
+}
+
+// ---- Tabs ----
+function setupTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const active = btn.dataset.tab === name;
+    btn.classList.toggle('text-primary', active);
+    btn.classList.toggle('border-primary', active);
+    btn.classList.toggle('text-on-surface-variant', !active);
+    btn.classList.toggle('border-transparent', !active);
+  });
+  document.querySelectorAll('.tab-content').forEach(el => {
+    el.classList.toggle('hidden', el.id !== 'tab-' + name);
+  });
+}
+
+// ---- Sticky nav shadow ----
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  nav.classList.toggle('shadow-xl', window.scrollY > 20);
+});
+</script>
+
+<!-- Firebase Auth -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3CWk3-mBly4eJDIzUdA_FOXYX2-L9Yd4",
+    authDomain: "bairdo-e23a3.firebaseapp.com",
+    projectId: "bairdo-e23a3",
+    storageBucket: "bairdo-e23a3.firebasestorage.app",
+    messagingSenderId: "8126805307",
+    appId: "1:8126805307:web:dbf71743bd29a3b73d731e"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    document.getElementById('account-loading').style.display = 'none';
+
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const name = user.displayName || user.email?.split('@')[0] || "User";
+    const email = user.email || "Anonymous";
+    const photo = user.photoURL;
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+    document.getElementById('dropdown-name').textContent = name;
+    document.getElementById('dropdown-email').textContent = email;
+    document.getElementById('dropdown-initials').textContent = initials;
+    document.getElementById('drawer-name').textContent = name;
+    document.getElementById('drawer-email').textContent = email;
+    document.getElementById('drawer-initials').textContent = initials;
+
+    if (photo) {
+      const btnImg = document.getElementById('account-photo');
+      btnImg.src = photo; btnImg.style.display = 'block';
+      const dropImg = document.getElementById('dropdown-photo');
+      dropImg.src = photo; dropImg.style.display = 'block';
+      document.getElementById('dropdown-initials-circle').style.display = 'none';
+      const drawerImg = document.getElementById('drawer-photo');
+      drawerImg.src = photo; drawerImg.style.display = 'block';
+      document.getElementById('drawer-initials-circle').style.display = 'none';
+    } else {
+      document.getElementById('account-initials').textContent = initials;
+      document.getElementById('account-initials').style.display = 'block';
+    }
+  });
+
+  document.getElementById('account-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('account-dropdown').classList.toggle('hidden');
+  });
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('account-menu-wrapper').contains(e.target))
+      document.getElementById('account-dropdown').classList.add('hidden');
+  });
+  document.getElementById('logout-btn').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
+  document.getElementById('drawer-logout').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
+
+  // Drawer
+  const drawer = document.getElementById('mobile-drawer');
+  const overlay = document.getElementById('drawer-overlay');
+  function openDrawer() { drawer.style.transform = 'translateX(0)'; overlay.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeDrawer() { drawer.style.transform = 'translateX(-100%)'; overlay.classList.add('hidden'); document.body.style.overflow = ''; }
+  document.getElementById('hamburger-btn').addEventListener('click', openDrawer);
+  document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+</script>
+
+</body>
+</html>
