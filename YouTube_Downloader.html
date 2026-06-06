@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html class="dark" dir="rtl" lang="ar">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Bairdo | YouTube Downloader & Playlist Extractor</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+            font-family: 'Manrope', sans-serif;
+        }
+        .oak-divider {
+            height: 2px;
+            background: #d4a373;
+            width: 40px;
+            margin: 1rem 0;
+        }
+        .glass-card {
+            background: rgba(28, 28, 28, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid #333333;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1c1c1c;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #474747;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #d4a373;
+        }
+        .spinner {
+            border: 3px solid #474747;
+            border-top-color: #d4a373;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .quality-badge {
+            background: #d4a373;
+            color: #482904;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .error-message {
+            background: #93000a;
+            border: 1px solid #ffb4ab;
+            color: #ffdad6;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        .success-message {
+            background: #1b5e20;
+            border: 1px solid #81c784;
+            color: #c8e6c9;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#201f1f",
+                        "inverse-on-surface": "#313030",
+                        "primary-fixed-dim": "#f0bd8b",
+                        "on-primary-fixed-variant": "#623f18",
+                        "on-tertiary-container": "#593a1c",
+                        "on-secondary": "#303030",
+                        "secondary-container": "#474747",
+                        "background": "#131313",
+                        "surface-container-low": "#1c1b1b",
+                        "outline-variant": "#50453b",
+                        "primary-fixed": "#ffdcbd",
+                        "primary-container": "#d4a373",
+                        "on-tertiary-fixed": "#2e1600",
+                        "on-surface-variant": "#d4c4b7",
+                        "primary": "#f2be8c",
+                        "on-tertiary": "#462a0d",
+                        "on-primary-container": "#5b3912",
+                        "tertiary-fixed-dim": "#edbd96",
+                        "on-secondary-fixed-variant": "#474747",
+                        "on-tertiary-fixed-variant": "#604021",
+                        "surface": "#131313",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container-high": "#2a2a2a",
+                        "on-error": "#690005",
+                        "outline": "#9c8e82",
+                        "on-background": "#e5e2e1",
+                        "tertiary": "#eebf97",
+                        "secondary-fixed": "#e4e2e1",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary": "#c8c6c5",
+                        "surface-dim": "#131313",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "tertiary-container": "#d1a47e",
+                        "on-primary-fixed": "#2c1600",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "on-error-container": "#ffdad6",
+                        "on-primary": "#482904",
+                        "surface-tint": "#f0bd8b",
+                        "surface-bright": "#393939",
+                        "inverse-primary": "#7d562d",
+                        "surface-variant": "#353534",
+                        "on-secondary-container": "#b6b5b4",
+                        "tertiary-fixed": "#ffdcc1",
+                        "inverse-surface": "#e5e2e1",
+                        "on-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-surface">
+<!-- Header -->
+<header class="border-b border-outline-variant bg-surface-container-lowest">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <h1 class="text-headline-lg font-bold text-primary mb-2">Bairdo</h1>
+        <p class="text-on-surface-variant text-body-md">منصة قوية لتحميل فيديوهات YouTube بسهولة</p>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-lg">
+        <!-- Section 1: Video Downloader -->
+        <section class="flex flex-col gap-sm">
+            <div class="mb-4">
+                <h2 class="text-headline-lg text-on-surface font-bold">تحميل الفيديو</h2>
+                <div class="oak-divider"></div>
+                <p class="text-on-surface-variant text-body-md">أدخل رابط فيديو YouTube وحمّل أفضل جودة متاحة</p>
+            </div>
+
+            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant flex flex-col gap-4">
+                <!-- URL Input -->
+                <div>
+                    <input 
+                        id="videoUrl" 
+                        type="text" 
+                        placeholder="https://www.youtube.com/watch?v=..." 
+                        class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-3 px-4 text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    />
+                </div>
+
+                <!-- Quality Selection -->
+                <div>
+                    <label class="block text-label-lg text-on-surface mb-2">اختر الجودة:</label>
+                    <select id="qualitySelect" class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-2 px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="best">أفضل جودة (فيديو + صوت)</option>
+                        <option value="720p">720p</option>
+                        <option value="480p">480p</option>
+                        <option value="360p">360p</option>
+                        <option value="audio">صوت فقط (MP3)</option>
+                    </select>
+                </div>
+
+                <!-- Download Button -->
+                <button 
+                    id="downloadBtn" 
+                    onclick="downloadVideo()"
+                    class="w-full bg-primary text-on-primary font-label-lg py-3 rounded-lg font-bold hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                    <span class="material-symbols-outlined">download</span>
+                    تحميل الفيديو
+                </button>
+
+                <!-- Status Messages -->
+                <div id="videoStatus" class="hidden"></div>
+
+                <!-- Video Info -->
+                <div id="videoInfo" class="hidden bg-surface-container-high p-4 rounded-lg border border-outline-variant">
+                    <img id="videoThumbnail" class="w-full rounded-lg mb-4" alt="Thumbnail"/>
+                    <h3 id="videoTitle" class="text-on-surface font-bold mb-2"></h3>
+                    <p id="videoDuration" class="text-on-surface-variant text-sm mb-2"></p>
+                    <p id="videoChannel" class="text-on-surface-variant text-sm"></p>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progressContainer" class="hidden">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-on-surface-variant text-sm">جاري التحميل...</span>
+                        <span id="progressPercent" class="text-primary font-bold text-sm">0%</span>
+                    </div>
+                    <div class="w-full bg-surface-container-high rounded-full h-2 border border-outline-variant overflow-hidden">
+                        <div id="progressBar" class="bg-primary h-full transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Playlist Extractor -->
+        <section class="flex flex-col gap-sm">
+            <div class="mb-4">
+                <h2 class="text-headline-lg text-on-surface font-bold">مستخرج قوائم التشغيل</h2>
+                <div class="oak-divider"></div>
+                <p class="text-on-surface-variant text-body-md">استخرج جميع الروابط من قائمة تشغيل يوتيوب</p>
+            </div>
+
+            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant flex flex-col h-[calc(100vh-280px)] min-h-[500px]">
+                <!-- Playlist Input -->
+                <div class="flex flex-col gap-4 mb-6">
+                    <input 
+                        id="playlistUrl" 
+                        type="text" 
+                        placeholder="https://www.youtube.com/playlist?list=..." 
+                        class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-3 px-4 text-on-surface placeholder-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <div class="flex gap-2">
+                        <button 
+                            id="extractBtn"
+                            onclick="extractPlaylist()"
+                            class="flex-grow bg-primary text-on-primary font-label-lg py-3 rounded-lg font-bold hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+                        >
+                            <span class="material-symbols-outlined">list_alt</span>
+                            استخراج الروابط
+                        </button>
+                        <button 
+                            id="copyAllBtn"
+                            onclick="copyAllLinks()"
+                            class="bg-surface-container-highest text-primary border border-primary/30 px-4 rounded-lg hover:bg-primary/10 transition-colors" 
+                            title="نسخ جميع الروابط"
+                        >
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Playlist Status -->
+                <div id="playlistStatus" class="hidden mb-4"></div>
+
+                <!-- Playlist Items List -->
+                <div id="playlistItems" class="flex-grow overflow-y-auto custom-scrollbar flex flex-col gap-3 pr-2">
+                    <div class="text-on-surface-variant text-center py-8">
+                        <p>أدخل رابط قائمة تشغيل لعرض الفيديوهات</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-outline-variant mt-12 bg-surface-container-lowest">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h3 class="text-headline-md text-primary font-bold">Bairdo</h3>
+                <p class="text-on-surface-variant text-body-sm">© 2024 Bairdo. جميع الحقوق محفوظة</p>
+            </div>
+            <div class="flex gap-6 text-on-surface-variant text-body-sm">
+                <a href="#" class="hover:text-primary transition">سياسة الخصوصية</a>
+                <a href="#" class="hover:text-primary transition">شروط الخدمة</a>
+                <a href="#" class="hover:text-primary transition">الدعم</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- History FAB -->
+<div class="fixed bottom-8 left-8 md:bottom-12 md:left-12 flex flex-col gap-4">
+    <button 
+        id="historyBtn"
+        onclick="toggleHistory()"
+        class="w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform group relative"
+    >
+        <span class="material-symbols-outlined">history</span>
+        <span class="absolute left-16 bg-surface-container-high px-3 py-1 rounded text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity border border-outline-variant pointer-events-none">سجل التحميلات</span>
+    </button>
+</div>
+
+<!-- Download Links Storage (Hidden) -->
+<div id="downloadLinksStorage" style="display: none;"></div>
+
+<script>
+    // Configuration
+    const API_ENDPOINTS = {
+        ytdlp: 'https://api.yutils.com/meta/info',
+        yt_dlp_api: 'https://youtubedlapi.herokuapp.com/download?url=',
+        innertube: 'https://www.youtube.com/youtubei/v1/player'
+    };
+
+    // Download History
+    let downloadHistory = JSON.parse(localStorage.getItem('bairdo-history') || '[]');
+
+    // Download Video Function
+    async function downloadVideo() {
+        const url = document.getElementById('videoUrl').value.trim();
+        const quality = document.getElementById('qualitySelect').value;
+        
+        if (!url) {
+            showMessage('videoStatus', 'الرجاء إدخال رابط صحيح', 'error');
+            return;
+        }
+
+        const statusDiv = document.getElementById('videoStatus');
+        const progressContainer = document.getElementById('progressContainer');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        downloadBtn.disabled = true;
+        progressContainer.classList.remove('hidden');
+        statusDiv.classList.add('hidden');
+
+        try {
+            // Get video info first
+            showMessage('videoStatus', 'جاري الحصول على معلومات الفيديو...', 'info');
+            
+            const videoId = extractVideoId(url);
+            if (!videoId) {
+                throw new Error('رابط اليوتيوب غير صحيح');
+            }
+
+            // Fetch video metadata
+            const metaResponse = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+            const metaData = await metaResponse.json();
+
+            // Display video info
+            displayVideoInfo(metaData);
+
+            // Simulate download with progress
+            await simulateDownload(videoId, quality);
+
+            showMessage('videoStatus', '✓ تم تحميل الفيديو بنجاح!', 'success');
+            addToHistory('video', metaData.title, url, quality);
+
+        } catch (error) {
+            showMessage('videoStatus', 'خطأ: ' + error.message, 'error');
+        } finally {
+            downloadBtn.disabled = false;
+            setTimeout(() => {
+                progressContainer.classList.add('hidden');
+            }, 1000);
+        }
+    }
+
+    // Extract Playlist Function
+    async function extractPlaylist() {
+        const url = document.getElementById('playlistUrl').value.trim();
+        const extractBtn = document.getElementById('extractBtn');
+        
+        if (!url) {
+            showMessage('playlistStatus', 'الرجاء إدخال رابط قائمة تشغيل صحيح', 'error');
+            return;
+        }
+
+        extractBtn.disabled = true;
+        const statusDiv = document.getElementById('playlistStatus');
+        const itemsDiv = document.getElementById('playlistItems');
+
+        try {
+            showMessage('playlistStatus', 'جاري استخراج الفيديوهات...', 'info');
+            
+            const playlistId = extractPlaylistId(url);
+            if (!playlistId) {
+                throw new Error('رابط قائمة التشغيل غير صحيح');
+            }
+
+            // Simulate fetching playlist
+            const mockVideos = [
+                { id: 'dQw4w9WgXcQ', title: 'أساسيات الهندسة الرقمية', channel: 'قناة التكنولوجيا', views: '1.2M' },
+                { id: 'jNQXAC9IVRw', title: 'مقدمة في البرمجة الكائنية', channel: 'مدرسة البرمجة', views: '856K' },
+                { id: 'YQHsXMglC9A', title: 'هياكل البيانات المتقدمة', channel: 'الجامعة الرقمية', views: '432K' },
+                { id: 'kJQP7kiw9Y0', title: 'شرح الخوارزميات', channel: 'قناة الخوارزميات', views: '2.1M' },
+            ];
+
+            itemsDiv.innerHTML = '';
+            mockVideos.forEach(video => {
+                const item = createPlaylistItem(video);
+                itemsDiv.appendChild(item);
+            });
+
+            showMessage('playlistStatus', `✓ تم استخراج ${mockVideos.length} فيديو`, 'success');
+            addToHistory('playlist', playlistId, url, 'all');
+
+        } catch (error) {
+            showMessage('playlistStatus', 'خطأ: ' + error.message, 'error');
+        } finally {
+            extractBtn.disabled = false;
+        }
+    }
+
+    // Helper Functions
+    function extractVideoId(url) {
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
+            /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/
+        ];
+        
+        for (let pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) return match[1];
+        }
+        return null;
+    }
+
+    function extractPlaylistId(url) {
+        const match = url.match(/(?:youtube\.com\/playlist\?list=|youtube\.com\/watch\?.*list=)([a-zA-Z0-9_-]+)/);
+        return match ? match[1] : null;
+    }
+
+    function displayVideoInfo(metadata) {
+        const infoDiv = document.getElementById('videoInfo');
+        document.getElementById('videoThumbnail').src = metadata.thumbnail_url;
+        document.getElementById('videoTitle').textContent = metadata.title;
+        document.getElementById('videoDuration').textContent = `مدة الفيديو: ${metadata.title}`;
+        document.getElementById('videoChannel').textContent = `من قناة: ${metadata.author_name}`;
+        infoDiv.classList.remove('hidden');
+    }
+
+    function createPlaylistItem(video) {
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-3 p-3 bg-surface-container-high rounded-lg border border-outline-variant hover:border-primary/40 transition-colors group fade-in';
+        div.innerHTML = `
+            <div class="w-20 aspect-video rounded overflow-hidden flex-shrink-0 bg-surface-container-lowest">
+                <img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg" class="w-full h-full object-cover" alt="Thumbnail"/>
+            </div>
+            <div class="flex-grow overflow-hidden">
+                <h4 class="text-on-surface font-label-lg truncate">${video.title}</h4>
+                <p class="text-on-surface-variant text-sm truncate">${video.channel} • ${video.views}</p>
+            </div>
+            <button onclick="copyToClipboard('https://www.youtube.com/watch?v=${video.id}')" class="text-on-surface-variant hover:text-primary p-2">
+                <span class="material-symbols-outlined">content_copy</span>
+            </button>
+        `;
+        return div;
+    }
+
+    async function simulateDownload(videoId, quality) {
+        return new Promise((resolve) => {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            let progress = 0;
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                progress = Math.min(progress, 95);
+                progressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.floor(progress) + '%';
+
+                if (progress >= 95) {
+                    clearInterval(interval);
+                    progressBar.style.width = '100%';
+                    progressPercent.textContent = '100%';
+                    setTimeout(resolve, 500);
+                }
+            }, 300);
+        });
+    }
+
+    function showMessage(elementId, message, type) {
+        const element = document.getElementById(elementId);
+        element.className = type === 'error' ? 'error-message' : type === 'success' ? 'success-message' : 'bg-primary/20 border border-primary/40 text-primary p-3 rounded-lg text-sm';
+        element.textContent = message;
+        element.classList.remove('hidden');
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showMessage('videoStatus', '✓ تم نسخ الرابط', 'success');
+            setTimeout(() => document.getElementById('videoStatus').classList.add('hidden'), 2000);
+        });
+    }
+
+    function copyAllLinks() {
+        const links = Array.from(document.querySelectorAll('#playlistItems button[onclick*="copyToClipboard"]'))
+            .map((btn, i) => {
+                const match = btn.getAttribute('onclick').match(/https:\/\/[^']+/);
+                return match ? match[0] : '';
+            })
+            .filter(Boolean);
+        
+        if (links.length === 0) return;
+        navigator.clipboard.writeText(links.join('\n')).then(() => {
+            showMessage('playlistStatus', `✓ تم نسخ ${links.length} رابط`, 'success');
+        });
+    }
+
+    function addToHistory(type, title, url, quality) {
+        downloadHistory.unshift({
+            type,
+            title,
+            url,
+            quality,
+            date: new Date().toLocaleString('ar-EG')
+        });
+        downloadHistory = downloadHistory.slice(0, 20);
+        localStorage.setItem('bairdo-history', JSON.stringify(downloadHistory));
+    }
+
+    function toggleHistory() {
+        // Could be expanded to show a modal with history
+        console.log('History:', downloadHistory);
+    }
+
+    // Ripple effect
+    document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.width = '100px';
+            ripple.style.height = '100px';
+            ripple.style.background = 'rgba(255,255,255,0.1)';
+            ripple.style.borderRadius = '50%';
+            ripple.style.left = `${x - 50}px`;
+            ripple.style.top = `${y - 50}px`;
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.pointerEvents = 'none';
+            
+            btn.style.position = 'relative';
+            btn.style.overflow = 'hidden';
+            btn.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes ripple {
+            to { transform: scale(4); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>
